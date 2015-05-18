@@ -1,0 +1,5 @@
+fix socket.io installation in windows
+
+cd node_modules\socket.io\node_modules\engine.io\node_modules\ws
+edit package.json to change the release of nan to 1.6.0
+node-gyp rebuild --msvs_version=2013
