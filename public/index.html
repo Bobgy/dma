@@ -1,0 +1,80 @@
+<!DOCTYPE HTML>
+<html>
+<body>
+
+<canvas id="myCanvas" width=960  height=600>your browser does not support the canvas tag </canvas>
+
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+	var socket = io();
+
+	var canvas=document.getElementById('myCanvas');
+	var ctx=canvas.getContext('2d');
+	var carr=new Array(), karr=new Array();
+	var x=100, y=100, step=10;
+	carr[0]='#66ccff';
+	carr[1]='#000000';
+	curr=0;
+	ctx.fillStyle=carr[curr];
+	ctx.fillRect(x,y,80,80);
+
+	socket.on('key', function(msg){
+		switch(msg.data){
+			case 87: //w
+			case 65: //a
+			case 83: //s
+			case 68: //d
+				karr[msg.data]=true;
+		}
+	});
+	socket.on('keyUp', function(msg){
+		switch(msg.data){
+			case 87: //w
+			case 65: //a
+			case 83: //s
+			case 68: //d
+				karr[msg.data]=false;
+		}
+	});
+	function update() {
+		ctx.fillStyle="#ffffff";
+		ctx.fillRect(0,0,960,600);
+		ctx.fillStyle=carr[curr];
+		if(karr[87])y-=step;
+		if(karr[65])x-=step;
+		if(karr[83])y+=step;
+		if(karr[68])x+=step;
+		ctx.fillRect(x,y,80,80);
+	}
+	setInterval("update()", "10");
+	document.onkeydown=downKeyCode;
+	function downKeyCode(e) {
+		var evt = e || window.event;
+		var keyCode = evt.KeyCode || evt.which || evt.charCode;
+		switch(keyCode){
+			case 87: //w
+			case 65: //a
+			case 83: //s
+			case 68: //d
+				if(!karr[keyCode])socket.emit('key', keyCode);
+				break;
+		}
+	}
+	document.onkeyup=upKeyCode;
+	function upKeyCode(e) {
+		var evt = e || window.event;
+		var keyCode = evt.KeyCode || evt.which || evt.charCode;
+		switch(keyCode){
+			case 87: //w
+			case 65: //a
+			case 83: //s
+			case 68: //d
+				socket.emit('keyUp', keyCode);
+				break;
+		}
+	}
+
+</script>
+
+</body>
+</html>
