@@ -2,51 +2,72 @@
 <html>
 <body>
 
+<!--
 <canvas id="myCanvas" width=960  height=600>your browser does not support the canvas tag </canvas>
+-->
 
+<script src="/pixi.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
+	var renderer = PIXI.autoDetectRenderer(960, 600, {backgroundColor : 0x1099bb});
+
+	document.body.appendChild(renderer.view);
+
+	// create the root of the scene graph
+	var stage = new PIXI.Container();
+
+	// create a texture from an image path
+	var texture = PIXI.Texture.fromImage('assets/bunny.png');
+
+	function animate() {
+	    requestAnimationFrame(animate);
+	    // render the container
+	    renderer.render(stage);
+	}
+
 	var socket = io();
 
-	var canvas=document.getElementById('myCanvas');
-	var ctx=canvas.getContext('2d');
-	var carr=new Array(), karr=new Array();
-	var x=100, y=100, step=10;
-	carr[0]='#66ccff';
-	carr[1]='#000000';
-	curr=0;
-	ctx.fillStyle=carr[curr];
-	ctx.fillRect(x,y,80,80);
+	var karr = [];
+	var step=5, id=-1;
+	var players = [];
 
-	socket.on('key', function(msg){
-		switch(msg.data){
-			case 87: //w
-			case 65: //a
-			case 83: //s
-			case 68: //d
-				karr[msg.data]=true;
+	socket.on('user_id', function(msg){
+		id = msg;
+	});
+	socket.on('sync', function(msg){
+		stage.removeChildren();
+		players = msg;
+		for (var i = 0; i < players.length; ++i) {
+			var player = players[i];
+			var sprite = new PIXI.Sprite(texture);
+			sprite.anchor.x = 0.5;
+			sprite.anchor.y = 0.5;
+			sprite.position.x = player.pos.x;
+			sprite.position.y = player.pos.y;
+			stage.addChild(sprite);
+			player.sprite = sprite;
 		}
 	});
-	socket.on('keyUp', function(msg){
-		switch(msg.data){
-			case 87: //w
-			case 65: //a
-			case 83: //s
-			case 68: //d
-				karr[msg.data]=false;
-		}
+	socket.on('keyDown', function(user_id, msg){
+		if (user_id == id) karr[msg] = true;
+		players[user_id].keyState[msg] = true;
+	});
+	socket.on('keyUp', function(user_id, msg){
+		if (user_id == id) karr[msg] = false;
+		players[user_id].keyState[msg] = false;
 	});
 	function update() {
-		ctx.fillStyle="#ffffff";
-		ctx.fillRect(0,0,960,600);
-		ctx.fillStyle=carr[curr];
-		if(karr[87])y-=step;
-		if(karr[65])x-=step;
-		if(karr[83])y+=step;
-		if(karr[68])x+=step;
-		ctx.fillRect(x,y,80,80);
+		for (var i = 0; i < players.length; ++i) {
+			var player = players[i];
+			if(player.keyState[87])player.pos.y-=step;
+			if(player.keyState[65])player.pos.x-=step;
+			if(player.keyState[83])player.pos.y+=step;
+			if(player.keyState[68])player.pos.x+=step;
+			player.sprite.position.x = player.pos.x;
+			player.sprite.position.y = player.pos.y;
+		}
 	}
-	setInterval("update()", "10");
+	setInterval("update()", "15");
 	document.onkeydown=downKeyCode;
 	function downKeyCode(e) {
 		var evt = e || window.event;
@@ -56,7 +77,7 @@
 			case 65: //a
 			case 83: //s
 			case 68: //d
-				if(!karr[keyCode])socket.emit('key', keyCode);
+				if(!karr[keyCode])socket.emit('keyDown', keyCode);
 				break;
 		}
 	}
@@ -74,6 +95,8 @@
 		}
 	}
 
+	// start animating
+	animate();
 </script>
 
 </body>
