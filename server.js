@@ -26,12 +26,12 @@ var update=function(){
 		//console.log(player.pos);
 	}
 }
-setInterval(update, 15);
+setInterval(update, 7);
 
 var synchronize=function(){
 	io.emit('sync', players);
 }
-setInterval(synchronize, 120);
+setInterval(synchronize, 14);
 
 io.on('connection', function(socket){
 	var user_id = user_count++;
