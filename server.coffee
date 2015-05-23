@@ -15,7 +15,7 @@ players = []
 sockets = []
 keys = [87, 65, 83, 68, 16]
 
-short_step = 2
+short_step = 1.5
 long_step = 3
 update = () ->
 	for player in players
