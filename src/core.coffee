@@ -12,15 +12,25 @@ class World
 			@animate = =>
 				requestAnimationFrame(@animate)
 				@renderer.render(@stage)
+
+		@tick = 0
+		@updating = false
 		@players = []
+		@entity_cnt = 2
+		@entities = []
+		# ensure entities[0..1] == players[0..1]
 		@user_count = 0
-	
+
 	addPlayer: (player) =>
 		@players.push(player)
+		@entities[player.id] = player
 
 	update: () =>
+		@updating = true
 		for player in @players
 			player.update()
+		@tick++
+		@updating = false
 
 	sync: (players) =>
 		@players = players
@@ -28,10 +38,8 @@ class World
 			@stage.removeChildren()
 			for player in @players
 				sprite = new PIXI.Sprite(@texture)
-				sprite.anchor.x = 0.5
-				sprite.anchor.y = 0.5
-				sprite.position.x = player.pos.x
-				sprite.position.y = player.pos.y
+				sprite.anchor.set(0.5, 0.5)
+				sprite.position.set(player.pos.x, player.pos.y)
 				player.sprite = sprite
 				@stage.addChild(sprite)
 
@@ -52,25 +60,34 @@ class Vec2
 	crossMul: (rhs) -> @x * rhs.y - @y * rhs.x
 	length: -> Math.sqrt(@x * @x + @y * @y)
 
+Vec2.zero = new Vec2(0, 0)
+keys = [16, 65, 68, 83, 87]
+
 class Entity
-	constructor: (@id, @pos, @world) ->
+	constructor: (@id, @pos, @v) ->
+	update: ->
+		@pos = @pos.add @v
+		@sprite?.position.set(@pos.x, @pos.y)
 
 class Player extends Entity
 	short_step	:	1.5
 	long_step	:	3
-	constructor: (id, pos, world) ->
-		@keyState = {}
-		super(id, pos, world)
+	constructor: (id, pos, v=Vec2.zero) ->
+		super(id, pos, v)
+		@keyState = []
+		for key in keys
+			@keyState[key] = false
+
 	update: ->
 		step = if @keyState[16] then @short_step else @long_step
-		@pos.y -= step if @keyState[87]
-		@pos.x -= step if @keyState[65]
-		@pos.y += step if @keyState[83]
-		@pos.x += step if @keyState[68]
-		@sprite?.position.set(@pos.x, @pos.y)
+		@v.x = (@keyState[68] - @keyState[65]) * step
+		@v.y = (@keyState[83] - @keyState[87]) * step
+		super()
 
 class Bullet extends Entity
-	constructor: (id, pos, @v, @a) ->
-		super(id, pos)
+	constructor: (id, pos, v) ->
+		super(id, pos, v)
+	update: ->
+		super()
 
 module.exports = [World, Player, Vec2, Bullet]
