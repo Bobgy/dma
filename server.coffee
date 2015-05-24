@@ -4,6 +4,8 @@ express = require('express')
 app = express()
 http = require('http').Server(app)
 io = require('socket.io')(http)
+core = require('./js/core.js')
+
 
 # set routes
 app.use('/', express.static(path.join(__dirname, 'public')))
