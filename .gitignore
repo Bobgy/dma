@@ -3,7 +3,9 @@
 
 # Generated javascript files
 js/*.js
+js/*.js.map
 server.js
+server.js.map
 
 # Logs
 logs

@@ -5,7 +5,7 @@ module.exports = (grunt) ->
 			grunt.file.readJSON('package.json')
 		coffee:
 			options:
-				sourceMap: false
+				sourceMap: true
 			compile:
 				files:
 					'js/core.js': 'src/core.coffee'

@@ -4,7 +4,7 @@ express = require('express')
 app = express()
 http = require('http').Server(app)
 io = require('socket.io')(http)
-[World, Player] = require('./js/core.js')
+[World, Player, Vec2, Bullet] = require('./js/core.js')
 game = new World()
 
 # set routes
@@ -27,7 +27,7 @@ io.on('connection', (socket) ->
 	socket.emit('user_id', user_id)
 	sockets.push(socket)
 	if user_id < 2
-		player = new Player(user_id, 300, if user_id then 500 else 100)
+		player = new Player(user_id, new Vec2(300, if user_id then 500 else 100))
 		game.addPlayer(player)
 		socket.on('keyDown', (msg) ->
 			io.emit('keyDown', user_id, msg)

@@ -1,8 +1,3 @@
-class Player
-	constructor: (@id, x, y) ->
-		@pos = {'x' : x, 'y' : y}
-		@keyState = {}
-
 class World
 	constructor: (@PIXI) ->
 		if @PIXI?
@@ -19,22 +14,13 @@ class World
 				@renderer.render(@stage)
 		@players = []
 		@user_count = 0
-
-	short_step	:	1.5
-	long_step	:	3
 	
 	addPlayer: (player) =>
 		@players.push(player)
 
 	update: () =>
 		for player in @players
-			step = if player.keyState[16] then @short_step else @long_step
-			player.pos.y -= step if player.keyState[87]
-			player.pos.x -= step if player.keyState[65]
-			player.pos.y += step if player.keyState[83]
-			player.pos.x += step if player.keyState[68]
-			player.sprite?.position.x = player.pos.x
-			player.sprite?.position.y = player.pos.y
+			player.update()
 
 	sync: (players) =>
 		@players = players
@@ -56,4 +42,35 @@ class World
 		setInterval(@update, interval)
 		@animate?()
 
-module.exports = [World, Player]
+class Vec2
+	constructor: (@x, @y) ->
+	add: (rhs) -> new Vec2(@x + rhs.x, @y + rhs.y)
+	sub: (rhs) -> new Vec2(@x - rhs.x, @y - rhs.y)
+	mul: (rhs) -> new Vec2(@x * rhs.x, @y * rhs.y)
+	scale: (k) -> new Vec2(@x * k, @y * k)
+	dotMul: (rhs) -> @x * rhs.x + @y * rhs.y
+	crossMul: (rhs) -> @x * rhs.y - @y * rhs.x
+	length: -> Math.sqrt(@x * @x + @y * @y)
+
+class Entity
+	constructor: (@id, @pos, @world) ->
+
+class Player extends Entity
+	short_step	:	1.5
+	long_step	:	3
+	constructor: (id, pos, world) ->
+		@keyState = {}
+		super(id, pos, world)
+	update: ->
+		step = if @keyState[16] then @short_step else @long_step
+		@pos.y -= step if @keyState[87]
+		@pos.x -= step if @keyState[65]
+		@pos.y += step if @keyState[83]
+		@pos.x += step if @keyState[68]
+		@sprite?.position.set(@pos.x, @pos.y)
+
+class Bullet extends Entity
+	constructor: (id, pos, @v, @a) ->
+		super(id, pos)
+
+module.exports = [World, Player, Vec2, Bullet]

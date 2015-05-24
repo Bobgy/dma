@@ -16,12 +16,12 @@ socket.on('sync', (msg) ->
 	game.sync(players)
 )
 socket.on('keyDown', (user_id, msg) ->
-	if (user_id == id) then karr[msg] = true
-	game.keyAction(user_id, true, msg)
+	if user_id is not id
+		game.keyAction(user_id, true, msg)
 )
 socket.on('keyUp', (user_id, msg) ->
-	if (user_id == id) then karr[msg] = false
-	game.keyAction(user_id, false, msg)
+	if user_id is not id
+		game.keyAction(user_id, false, msg)
 )
 
 downKeyCode = (e) ->
@@ -31,6 +31,8 @@ downKeyCode = (e) ->
 		when 87, 65, 83, 68, 16 # w, a, s, d, shift
 			if not karr[keyCode]
 				socket.emit('keyDown', keyCode)
+				if id < 2 then game.keyAction(id, true, keyCode)
+			karr[keyCode] = true
 document.onkeydown = downKeyCode
 
 upKeyCode = (e) ->
@@ -39,6 +41,8 @@ upKeyCode = (e) ->
 	switch keyCode
 		when 87, 65, 83, 68, 16 # w, a, s, d, shift
 			socket.emit('keyUp', keyCode)
+			if id < 2 then game.keyAction(id, false, keyCode)
+			karr[keyCode] = false
 document.onkeyup = upKeyCode
 
 # start animating
