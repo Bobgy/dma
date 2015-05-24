@@ -16,7 +16,7 @@ module.exports = (grunt) ->
 				src: 'js/game.js'
 				dest: 'js/bundle.js'
 		watch:
-			files: ['js/*.coffee', 'server.coffee']
+			files: ['src/*.coffee', 'server.coffee']
 			tasks: ['coffee', 'browserify']
 	)
 
