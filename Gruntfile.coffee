@@ -8,8 +8,8 @@ module.exports = (grunt) ->
 				sourceMap: false
 			compile:
 				files:
-					'js/core.js': 'js/core.coffee'
-					'js/game.js': 'js/game.coffee'
+					'js/core.js': 'src/core.coffee'
+					'js/game.js': 'src/game.coffee'
 					'server.js': 'server.coffee'
 		browserify:
 			js:
