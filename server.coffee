@@ -13,11 +13,15 @@ app.use(express.static(path.join(__dirname, 'js')))
 app.use('/assets', express.static(path.join(__dirname, 'assets')))
 
 sockets = []
-keys = [16, 65, 68, 83, 87]
+keys = [16, 65, 68, 83, 87, 191]
 
 game.run(7)
 
-synchronize = () -> io.emit('sync', game.players)
+center = new Vec2(game.w/2, game.h/2)
+game.addEntity(new Bullet(10, center, new Vec2(0.1, -0.2)))
+game.addEntity(new Bullet(10, center, new Vec2(0, 0)))
+
+synchronize = () -> io.emit('sync', game.players, game.entities)
 setInterval(synchronize, 14)
 
 user_count = 0
@@ -39,7 +43,7 @@ io.on('connection', (socket) ->
 			console.log(user + ' keyUp: ' + msg)
 			game.keyAction(user_id, false, msg)
 		)
-	socket.emit('sync', game.players)
+	socket.emit('sync', game.players, game.entities)
 	if user_id==1 then sockets[0].emit('sync', game.players)
 	console.log(user + ' connected')
 	socket.on('disconnect', ->
