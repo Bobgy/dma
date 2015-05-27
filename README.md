@@ -53,6 +53,7 @@ Server also run a copy of the game to detect whether characters are hitted by a 
 ### Benefit
 
 The benefit from this strategy should be clear:
+
 - The bullets attacking you and your controls are all realtime.
 - You can watch your opponent dodging bullets smoothly without staggering.
 - Clients cannot cheat.
