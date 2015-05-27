@@ -4,7 +4,7 @@ express = require('express')
 app = express()
 http = require('http').Server(app)
 io = require('socket.io')(http)
-[World, Player, Vec2, Bullet] = require('./src/core.coffee')
+[World, Player, Vec2, Bullet] = require('./js/core.js')
 game = new World()
 
 # set routes
@@ -24,13 +24,8 @@ game.addEntity(new Bullet(10, center, new Vec2(0, 0)))
 synchronize = () -> io.emit('sync', game.players, game.entities)
 setInterval(synchronize, 14)
 
-a = {}
-b = {}
-b.c = 'abc'
-a.b = b
 user_count = 0
 io.on('connection', (socket) ->
-	socket.emit('test', a, b);
 	user_id = user_count++
 	user = 'user ' + user_id
 	socket.emit('user_id', user_id)

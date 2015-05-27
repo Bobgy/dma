@@ -21,7 +21,7 @@ node-gyp rebuild --msvs_version=2013 # I used Visual Studio 2013
 
 Now, socket.io should be working.
 
-## Synchronization Strategy
+## Planned Synchronization Strategy
 
 The game is designed so that synchronization is easier and allows longer delay:
 

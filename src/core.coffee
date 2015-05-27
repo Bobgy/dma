@@ -24,7 +24,6 @@ class World
 
 	addPlayer: (player) =>
 		@players.push(player)
-		player.id = @entities.push(player) - 1
 
 	addEntity: (entity) =>
 		entity.id = @entities.push(entity) - 1
@@ -33,22 +32,37 @@ class World
 		@updating = true
 		for entity in @entities
 			entity.update(@w, @h)
+		for player in @players
+			player.update(@w, @h)
 		@tick++
 		@updating = false
 
+	importEntity: (entity) =>
+		texture = switch entity.type
+			when 'Player'
+				newEntity = new Player()
+				@players.push(newEntity)
+				@texture_player
+			when 'Bullet'
+				newEntity = new Bullet()
+				@entities.push(newEntity)
+				@texture_bullet
+		newEntity.sync(entity)
+		if PIXI?
+			sprite = new PIXI.Sprite(texture)
+			sprite.anchor.set(0.5, 0.5)
+			sprite.position.set(entity.pos.x, entity.pos.y)
+			@stage.addChild(sprite)
+			newEntity.sprite = sprite
+
 	sync: (players, entities) =>
-		@players = players
-		@entities = entities
-		if @stage?
-			@stage.removeChildren()
-			for entity in entities
-				sprite = switch entity.type
-					when 'Player' then new PIXI.Sprite(@texture_player)
-					when 'Bullet' then new PIXI.Sprite(@texture_bullet)
-				sprite.anchor.set(0.5, 0.5)
-				sprite.position.set(entity.pos.x, entity.pos.y)
-				entity.sprite = sprite
-				@stage.addChild(sprite)
+		@players = []
+		@entities = []
+		@stage?.removeChildren()
+		for entity in entities
+			@importEntity(entity)
+		for player in players
+			@importEntity(player)
 
 	keyAction: (user_id, isDown, keyCode) =>
 		@players[user_id].keyState[keyCode] = isDown
@@ -59,7 +73,7 @@ class World
 
 class Vec2
 	type: 'Vec2'
-	constructor: (@x, @y) ->
+	constructor: (@x = 0, @y = 0) ->
 	add: (rhs) => new Vec2(@x + rhs.x, @y + rhs.y)
 	sub: (rhs) => new Vec2(@x - rhs.x, @y - rhs.y)
 	mul: (rhs) => new Vec2(@x * rhs.x, @y * rhs.y)
@@ -67,6 +81,9 @@ class Vec2
 	dotMul: (rhs) => @x * rhs.x + @y * rhs.y
 	crossMul: (rhs) => @x * rhs.y - @y * rhs.x
 	length: => Math.sqrt(@x * @x + @y * @y)
+	sync: (rhs) =>
+		@x = rhs.x
+		@y = rhs.y
 Vec2.zero = new Vec2(0, 0)
 
 class Entity
@@ -74,19 +91,26 @@ class Entity
 		@id = -1 #uninitilized value
 		@valid = true
 	update: =>
-		@pos = @pos.add @v
+		@pos = @pos.add(@v)
 		@sprite?.position.set(@pos.x, @pos.y)
+	sync: (rhs) =>
+		@pos = new Vec2()
+		@v = new Vec2()
+		@pos.sync(rhs.pos)
+		@v.sync(rhs.v)
+		@id = rhs.id
+		@valid = rhs.valid
+
 
 class Player extends Entity	
 	short_step	:	1.5
 	long_step	:	3
 	keys		:	[16, 65, 68, 83, 87]
 	verbose		:	false
-	constructor: (@player_id, pos, v=Vec2.zero) ->
+	constructor: (@playerID, pos, v=Vec2.zero) ->
 		super(pos, v)
 		@keyState = []
 		@type = 'Player'
-		console.log(@keys)
 		for key in @keys
 			@keyState[key] = false
 		@cd = 0
@@ -103,9 +127,16 @@ class Player extends Entity
 
 		if @verbose then console.log(@pos)
 
+	sync: (rhs) =>
+		super(rhs)
+		@keyState = rhs.keyState
+		@cd = rhs.cd
+		@playerID = rhs.playerID
+
+
 class Bullet extends Entity
 	collision: true
-	constructor: (@r, pos, v) ->
+	constructor: (@r=0, pos=Vec2.zero, v=Vec2.zero) ->
 		@type = 'Bullet'
 		super(pos, v)
 	update: (w, h) =>
@@ -114,5 +145,8 @@ class Bullet extends Entity
 		if @pos.x < -@r or @pos.y < -@r or @pos.x > @w + @r or @pos.y > @h + @r
 			@valid = false
 			@sprite?.visible = false
+	sync: (rhs) =>
+		super(rhs)
+		@r = rhs.r
 
 module.exports = [World, Player, Vec2, Bullet]

@@ -4,15 +4,15 @@ module.exports = (grunt) ->
 		pkg:
 			grunt.file.readJSON('package.json')
 		coffee:
-			options:
-				sourceMap: true
+			core:
+				src: 'src/core.coffee'
+				dest: 'js/core.js'
 			server:
-				files:
-					'server.js': 'server.coffee'
+				src: 'server.coffee'
+				dest: 'server.js'
 			client:
-				files:
-					'js/core.js': 'src/core.coffee'
-					'js/game.js': 'src/game.coffee'
+				src: 'src/game.coffee'
+				dest: 'js/game.js'
 		coffeeify:
 			options:
 				debug: true
@@ -20,16 +20,14 @@ module.exports = (grunt) ->
 				src: 'src/game.coffee'
 				dest: 'js/bundle.js'
 		watch:
-			files: ['coffee/*.coffee', 'server.coffee']
-			tasks: ['coffee', 'browserify']
+			files: ['src/*.coffee']
+			tasks: ['coffee:core', 'coffeeify']
 	)
-
-	# Load the plugin that provides the "uglify" task.
-	# grunt.loadNpmTasks('grunt-contrib-uglify')
 
 	grunt.loadNpmTasks('grunt-contrib-coffee')
 	grunt.loadNpmTasks('grunt-browserify')
 	grunt.loadNpmTasks('grunt-contrib-watch')
 	grunt.loadNpmTasks('grunt-coffeeify')
+
 	# Default task(s).
-	grunt.registerTask('default', ['coffeeify'])
+	grunt.registerTask('default', ['coffee:core', 'coffeeify'])

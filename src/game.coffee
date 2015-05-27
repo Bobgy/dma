@@ -22,10 +22,6 @@ socket.on('keyUp', (user_id, msg) ->
 	if user_id is not id
 		game.keyAction(user_id, false, msg)
 )
-socket.on('test', (a, b) ->
-	console.log(a)
-	console.log(b)
-)
 downKeyCode = (e) ->
 	evt = e || window.event
 	keyCode = evt.KeyCode || evt.which || evt.charCode
