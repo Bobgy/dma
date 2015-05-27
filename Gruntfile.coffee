@@ -6,17 +6,21 @@ module.exports = (grunt) ->
 		coffee:
 			options:
 				sourceMap: true
-			compile:
+			server:
+				files:
+					'server.js': 'server.coffee'
+			client:
 				files:
 					'js/core.js': 'src/core.coffee'
 					'js/game.js': 'src/game.coffee'
-					'server.js': 'server.coffee'
-		browserify:
-			js:
-				src: 'js/game.js'
+		coffeeify:
+			options:
+				debug: true
+			game:
+				src: 'src/game.coffee'
 				dest: 'js/bundle.js'
 		watch:
-			files: ['src/*.coffee', 'server.coffee']
+			files: ['coffee/*.coffee', 'server.coffee']
 			tasks: ['coffee', 'browserify']
 	)
 
@@ -26,6 +30,6 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks('grunt-contrib-coffee')
 	grunt.loadNpmTasks('grunt-browserify');
 	grunt.loadNpmTasks('grunt-contrib-watch')
-
+	grunt.loadNpmTasks('grunt-coffeeify')
 	# Default task(s).
-	grunt.registerTask('default', ['coffee', 'browserify'])
+	grunt.registerTask('default', ['coffeeify'])
