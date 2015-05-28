@@ -15,10 +15,10 @@ class World
 			# create a texture from an image path
 			@texture_player = @PIXI.Texture.fromImage('assets/bunny.png')
 			@texture_bullet = @PIXI.Texture.fromImage('assets/bullet.png')
+			@texture_servant = @PIXI.Texture.fromImage('assets/servant.png')
 			@animate = =>
 				requestAnimationFrame(@animate)
 				@renderer.render(@stage)
-
 		@tick = 0
 		@updating = false
 		@players = []
@@ -28,17 +28,15 @@ class World
 	addPlayer: (player) =>
 		@players.push(player)
 		this
-
 	addEntity: (entity) =>
 		entity.id = @entities.push(entity) - 1
 		this
-
 	update: () =>
 		@updating = true
 		for entity in @entities
-			entity.update(@w, @h)
+			entity.update(this)
 		for player in @players
-			player.update(@w, @h)
+			player.update(this)
 		@tick++
 		@updating = false
 		this
@@ -53,6 +51,10 @@ class World
 				newEntity = EntityFactory(Bullet, entity)
 				@entities.push(newEntity)
 				@texture_bullet
+			when 'Servant'
+				newEntity = EntityFactory(Servant, entity)
+				@entities.push(newEntity)
+				@texture_servant
 		if PIXI?
 			sprite = new PIXI.Sprite(texture)
 			sprite.anchor.set(0.5, 0.5)
@@ -72,7 +74,6 @@ class World
 
 	keyAction: (user_id, isDown, keyCode) =>
 		@players[user_id].keyState[keyCode] = isDown
-
 	run: (interval) =>
 		setInterval(@update, interval)
 		@animate?()
@@ -91,6 +92,8 @@ class Vec2
 		@x = rhs.x
 		@y = rhs.y
 		this
+	clone: =>
+		new Vec2(@x, @y)
 
 Vec2.zero = new Vec2(0, 0)
 
@@ -98,12 +101,10 @@ class Entity
 	constructor: (@pos, @v) ->
 		@id = -1 #uninitilized value
 		@valid = true
-	
 	update: =>
 		@pos = @pos.add(@v)
 		@sprite?.position.set(@pos.x, @pos.y)
 		this
-	
 	sync: (rhs) =>
 		@pos = new Vec2()
 		@v = new Vec2()
@@ -116,29 +117,34 @@ class Entity
 class Player extends Entity	
 	short_step	:	1.5
 	long_step	:	3
-	keys		:	[16, 65, 68, 83, 87]
+	#               Shift,  A,  D,  S,  W,   /
+	keys		:	[  16, 65, 68, 83, 87, 191]
 	verbose		:	false
-
-	constructor: (@playerID, pos, v=Vec2.zero) ->
+	constructor: (@playerID=-1, pos=Vec2.zero, @face=Vec2.zero, v=Vec2.zero) ->
 		super(pos, v)
 		@keyState = []
 		@type = 'Player'
 		for key in @keys
 			@keyState[key] = false
 		@cd = 0
-
-	update: (w, h) =>
+	update: (world) =>
 		step = if @keyState[16] then @short_step else @long_step
 		@v.x = (@keyState[68] - @keyState[65]) * step
 		@v.y = (@keyState[83] - @keyState[87]) * step
 		super()
 		@pos.x = Math.max(20, @pos.x)
 		@pos.y = Math.max(20, @pos.y)
-		@pos.x = Math.min(w-20, @pos.x)
-		@pos.y = Math.min(h-20, @pos.y)
+		@pos.x = Math.min(world.w-20, @pos.x)
+		@pos.y = Math.min(world.h-20, @pos.y)
+		if @cd is 0
+			if @keyState[191]
+				@cd = 240
+				servant = new Servant(@pos, @v, 120, @face)
+				world.addEntity(servant)
+		else
+			@cd--
 		if @verbose then console.log(@pos)
 		this
-
 	sync: (rhs) =>
 		super(rhs)
 		@keyState = rhs.keyState
@@ -148,22 +154,44 @@ class Player extends Entity
 
 class Bullet extends Entity
 	collision: true
-
 	constructor: (@r=0, pos=Vec2.zero, v=Vec2.zero) ->
 		@type = 'Bullet'
 		super(pos, v)
-	
-	update: (w, h) =>
+	update: (world) =>
 		super()
 		# remove when out of screen
-		if @pos.x < -@r or @pos.y < -@r or @pos.x > @w + @r or @pos.y > @h + @r
+		# if @pos.x < -@r or @pos.y < -@r or @pos.x > world.w + @r or @pos.y > world.h + @r
+		if @pos.x < @r or @pos.y < @r or @pos.x > world.w - @r or @pos.y > world.h - @r
 			@valid = false
 			@sprite?.visible = false
 		this
-	
 	sync: (rhs) =>
 		super(rhs)
 		@r = rhs.r
 		this
+
+class Servant extends Entity
+	constructor: (pos=Vec2.zero, v=Vec2.zero, @cd=1000, @face=Vec2.zero) ->
+		super(new Vec2(pos.x, pos.y), new Vec2(v.x, v.y))
+		@timer = 120
+		@type = 'Servant'
+	update: (world) =>
+		super()
+		if @timer is 0
+			@trigger?(world)
+		else
+			@timer--
+		return this
+	trigger: (world) =>
+		@timer = @cd
+		bullet = new Bullet(10, @pos.add(@face), @face)
+		world.addEntity(bullet)
+		return this
+	sync: (rhs) =>
+		super(rhs)
+		@cd = rhs.cd
+		@face = rhs.face
+		@timer = rhs.timer
+		return this
 
 module.exports = [World, Player, Vec2, Bullet]
