@@ -1,3 +1,6 @@
+EntityFactory = (type, entity) ->
+	(new type()).sync(entity)
+
 class World
 	w: 960
 	h: 600
@@ -24,9 +27,11 @@ class World
 
 	addPlayer: (player) =>
 		@players.push(player)
+		this
 
 	addEntity: (entity) =>
 		entity.id = @entities.push(entity) - 1
+		this
 
 	update: () =>
 		@updating = true
@@ -36,18 +41,18 @@ class World
 			player.update(@w, @h)
 		@tick++
 		@updating = false
+		this
 
 	importEntity: (entity) =>
 		texture = switch entity.type
 			when 'Player'
-				newEntity = new Player()
+				newEntity = EntityFactory(Player, entity)
 				@players.push(newEntity)
 				@texture_player
 			when 'Bullet'
-				newEntity = new Bullet()
+				newEntity = EntityFactory(Bullet, entity)
 				@entities.push(newEntity)
 				@texture_bullet
-		newEntity.sync(entity)
 		if PIXI?
 			sprite = new PIXI.Sprite(texture)
 			sprite.anchor.set(0.5, 0.5)
@@ -63,6 +68,7 @@ class World
 			@importEntity(entity)
 		for player in players
 			@importEntity(player)
+		this
 
 	keyAction: (user_id, isDown, keyCode) =>
 		@players[user_id].keyState[keyCode] = isDown
@@ -84,15 +90,20 @@ class Vec2
 	sync: (rhs) =>
 		@x = rhs.x
 		@y = rhs.y
+		this
+
 Vec2.zero = new Vec2(0, 0)
 
 class Entity
 	constructor: (@pos, @v) ->
 		@id = -1 #uninitilized value
 		@valid = true
+	
 	update: =>
 		@pos = @pos.add(@v)
 		@sprite?.position.set(@pos.x, @pos.y)
+		this
+	
 	sync: (rhs) =>
 		@pos = new Vec2()
 		@v = new Vec2()
@@ -100,13 +111,14 @@ class Entity
 		@v.sync(rhs.v)
 		@id = rhs.id
 		@valid = rhs.valid
-
+		this
 
 class Player extends Entity	
 	short_step	:	1.5
 	long_step	:	3
 	keys		:	[16, 65, 68, 83, 87]
 	verbose		:	false
+
 	constructor: (@playerID, pos, v=Vec2.zero) ->
 		super(pos, v)
 		@keyState = []
@@ -124,29 +136,34 @@ class Player extends Entity
 		@pos.y = Math.max(20, @pos.y)
 		@pos.x = Math.min(w-20, @pos.x)
 		@pos.y = Math.min(h-20, @pos.y)
-
 		if @verbose then console.log(@pos)
+		this
 
 	sync: (rhs) =>
 		super(rhs)
 		@keyState = rhs.keyState
 		@cd = rhs.cd
 		@playerID = rhs.playerID
-
+		this
 
 class Bullet extends Entity
 	collision: true
+
 	constructor: (@r=0, pos=Vec2.zero, v=Vec2.zero) ->
 		@type = 'Bullet'
 		super(pos, v)
+	
 	update: (w, h) =>
 		super()
 		# remove when out of screen
 		if @pos.x < -@r or @pos.y < -@r or @pos.x > @w + @r or @pos.y > @h + @r
 			@valid = false
 			@sprite?.visible = false
+		this
+	
 	sync: (rhs) =>
 		super(rhs)
 		@r = rhs.r
+		this
 
 module.exports = [World, Player, Vec2, Bullet]
