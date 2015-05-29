@@ -1,3 +1,7 @@
+# test files
+test.coffee
+test.js
+
 # Sublime
 *.un~
 
