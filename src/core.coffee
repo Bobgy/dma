@@ -1,7 +1,6 @@
 Vec2 = require('./Vec2.coffee')
 
-EntityFactory = (type, entity) ->
-	(new type()).sync(entity)
+EntityFactory = (type, entity) -> type.create(entity)
 
 class World
 	w: 960
@@ -50,11 +49,13 @@ class World
 				@players.push(newEntity)
 				@texture_player
 			when 'Bullet'
+				console.log('Error Bullet!')
 				newEntity = EntityFactory(Bullet, entity)
 				@entities.push(newEntity)
 				@texture_bullet
 			when 'Servant'
 				newEntity = EntityFactory(Servant, entity)
+				@stage.addChild(newEntity.pool.initSprite(@texture_bullet, @PIXI)) if @PIXI?
 				@entities.push(newEntity)
 				@texture_servant
 		if PIXI?
@@ -66,8 +67,9 @@ class World
 
 	sync: (players, entities) =>
 		@players = []
+		for sprite in @stage?.removeChildren()
+			sprite.destroy()
 		@entities = []
-		@stage?.removeChildren()
 		for entity in entities
 			@importEntity(entity)
 		for player in players
@@ -85,24 +87,23 @@ class Entity
 		@id = -1 #uninitilized value
 		@valid = true
 	update: =>
-		@pos = @pos.add(@v)
-		@sprite?.position.set(@pos.x, @pos.y)
+		@pos.copy(@pos.add(@v))
+		# @sprite?.position.set(@pos.x, @pos.y)
 		this
-	sync: (rhs) =>
-		@pos = new Vec2()
-		@v = new Vec2()
-		@pos.sync(rhs.pos)
-		@v.sync(rhs.v)
+	copy: (rhs) =>
+		@pos.copy(rhs.pos)
+		@v.copy(rhs.v)
 		@id = rhs.id
 		@valid = rhs.valid
-		this
+	destroy: =>
+		@pos = null
+		@v = null
 
 class Player extends Entity	
 	short_step	:	1.5
 	long_step	:	3
 	#               Shift,  A,  D,  S,  W,   /
 	keys		:	[  16, 65, 68, 83, 87, 191]
-	verbose		:	false
 	constructor: (@playerID=-1, pos=new Vec2(), @face=new Vec2(), v=new Vec2()) ->
 		super(pos, v)
 		@keyState = []
@@ -126,32 +127,115 @@ class Player extends Entity
 				world.addEntity(servant)
 		else
 			@cd--
-		if @verbose then console.log(@pos)
 		this
-	sync: (rhs) =>
+	copy: (rhs) =>
 		super(rhs)
 		@keyState = rhs.keyState
 		@cd = rhs.cd
 		@playerID = rhs.playerID
 		this
+	destroy: =>
+		@face = null
+		@keyState.splice(0, keyState.length)
+		@keyState = null
+		super()
+
+Player.create = (rhs) ->
+	(new Player()).copy(rhs)
 
 class Bullet extends Entity
 	collision: true
-	constructor: (@r=0, pos=new Vec2(), v=new Vec2()) ->
-		@type = 'Bullet'
+	constructor: (pos=new Vec2(), v=new Vec2(), @r=0) ->
 		super(pos, v)
+		@type = 'Bullet'
 	update: (world) =>
 		super()
 		# remove when out of screen
 		# if @pos.x < -@r or @pos.y < -@r or @pos.x > world.w + @r or @pos.y > world.h + @r
 		if @pos.x < @r or @pos.y < @r or @pos.x > world.w - @r or @pos.y > world.h - @r
-			@valid = false
-			@sprite?.visible = false
+			@die()
 		this
-	sync: (rhs) =>
+	clone: => new Bullet(@pos.clone(), @v.clone(), @r)
+	die: =>
+		@valid = false
+		@sprite?.visible = false
+	wake: =>
+		@valid = true
+		@sprite?.visible = true
+	copyStatus: (rhs) =>
+		@valid = rhs.valid
+		@pos.copy(rhs.pos)
+		this
+	copy: (rhs) =>
 		super(rhs)
 		@r = rhs.r
 		this
+	destroy: =>
+		@r = null
+		super()
+
+Bullet.create = (rhs) ->
+	bullet = new Bullet(rhs.pos.clone(), rhs.v.clone(), rhs.r)
+	bullet.valid = rhs.valid
+	return bullet
+
+# A fixed pool containing bullets of the same type
+# int size: the maximum expected number of bullets in the screen
+# Bullet bulletPrototype: a prototype used to initialize the pool
+# TODO: use a dictionary to store the empty slots
+class BulletPool
+	# @param size {int}: the pool size
+	# @param bullet {Bullet}: the template for bullets
+	constructor: (size, bullet) ->
+		@pool = new Array(size)
+		for i in [0..size-1]
+			@pool[i] = bullet.clone()
+			@pool[i].id = i;
+			@pool[i].valid = false
+		@type = 'BulletPool'
+
+	# @param texture {PIXI.Texture}: the texture used to create sprites
+	# @param PIXI {optional}: the module, left empty to initialize a bulletPool without graphics
+	initSprite: (texture, PIXI) =>
+		@spritePool = new PIXI.Container()
+		for bullet in @pool
+			sprite = new PIXI.Sprite(texture)
+			sprite.anchor.set(0.5, 0.5)
+			sprite.position = bullet.pos
+			sprite.visible = bullet.valid
+			bullet.sprite = sprite
+			@spritePool.addChild(sprite)
+		return @spritePool
+
+	# update the bullets when bullet.valid = true
+	# @param world {World}: handle to the world
+	update: (world) =>
+		for bullet in @pool
+			if bullet.valid
+				bullet.update(world)
+		this
+
+	# find the first empty slot (with an invalid bullet) in the pool
+	# @return bullet {Bullet}, bullet.valid means not found
+	findFirstEmptySlot: =>
+		for bullet in @pool
+			if not bullet.valid then return bullet
+		return @pool[0]
+
+	destroy: =>
+		@pool = null
+		@spritePool?.destroy(true)
+		@spritePool = null
+
+	copy: (rhs) =>
+		for bullet in @pool
+			bullet.copyStatus(rhs.pool[bullet.id])
+		this
+
+BulletPool.create = (rhs) =>
+	bullet = Bullet.copy(rhs.pool[0])
+	bulletPool = new BulletPool(rhs.pool.length, bullet)
+	return bulletPool.copy(rhs)
 
 # A container that is used to store Object with property 'valid'
 # It assumes objects pushed earlier will generall become 'invalid' earlier
@@ -191,27 +275,51 @@ class Timer
 			@callback(@parent, world)
 
 class Servant extends Entity
+	# @param pos {Vec2}
+	# @param v {Vec2}
+	# @param cd {int}
+	# @param face {Vec2}
 	constructor: (pos=new Vec2(), v=new Vec2(), @cd=1000, @face=new Vec2()) ->
 		super(new Vec2(pos.x, pos.y), new Vec2(v.x, v.y))
 		@timer = 120
 		@type = 'Servant'
+		@pool = new BulletPool(1, new Bullet(new Vec2(), new Vec2(), 10))
+
 	update: (world) =>
 		super()
 		if @timer is 0
 			@trigger?(world)
 		else
 			@timer--
+		@pool.update(world)
 		return this
+
 	trigger: (world) =>
 		@timer = @cd
-		bullet = new Bullet(10, @pos.add(@face), @face)
-		world.addEntity(bullet)
+		bullet = @pool.findFirstEmptySlot()
+		if not bullet.valid
+			bullet.pos.copy(@pos.add(@face))
+			bullet.v.copy(@face)
+			bullet.wake()
+		else
+			console.log('BulletPool is full!')
 		return this
-	sync: (rhs) =>
+
+	copy: (rhs) =>
 		super(rhs)
 		@cd = rhs.cd
-		@face = rhs.face
+		@face.copy(rhs.face)
 		@timer = rhs.timer
+		@pool.copy(rhs.pool)
 		return this
+
+	destroy: =>
+		@pool.destroy()
+		@pool = null
+		@face = null
+		# super()
+
+Servant.create = (rhs) ->
+	(new Servant()).copy(rhs)
 
 module.exports = [World, Player, Bullet]
