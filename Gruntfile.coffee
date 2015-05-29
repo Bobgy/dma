@@ -21,7 +21,7 @@ module.exports = (grunt) ->
 				dest: 'js/bundle.js'
 		watch:
 			files: ['src/*.coffee']
-			tasks: ['coffee:core', 'coffeeify']
+			tasks: ['coffeeify']
 	)
 
 	grunt.loadNpmTasks('grunt-contrib-coffee')
@@ -30,4 +30,4 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks('grunt-coffeeify')
 
 	# Default task(s).
-	grunt.registerTask('default', ['coffee:core', 'coffeeify'])
+	grunt.registerTask('default', ['coffeeify'])

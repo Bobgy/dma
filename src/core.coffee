@@ -1,3 +1,5 @@
+Vec2 = require('./Vec2.coffee')
+
 EntityFactory = (type, entity) ->
 	(new type()).sync(entity)
 
@@ -77,23 +79,6 @@ class World
 	run: (interval) =>
 		setInterval(@update, interval)
 		@animate?()
-
-class Vec2
-	type: 'Vec2'
-	constructor: (@x = 0, @y = 0) ->
-	add: (rhs) => new Vec2(@x + rhs.x, @y + rhs.y)
-	sub: (rhs) => new Vec2(@x - rhs.x, @y - rhs.y)
-	mul: (rhs) => new Vec2(@x * rhs.x, @y * rhs.y)
-	scale: (k) => new Vec2(@x * k, @y * k)
-	dotMul: (rhs) => @x * rhs.x + @y * rhs.y
-	crossMul: (rhs) => @x * rhs.y - @y * rhs.x
-	length: => Math.sqrt(@x * @x + @y * @y)
-	sync: (rhs) =>
-		@x = rhs.x
-		@y = rhs.y
-		this
-	clone: =>
-		new Vec2(@x, @y)
 
 class Entity
 	constructor: (@pos, @v) ->
@@ -229,4 +214,4 @@ class Servant extends Entity
 		@timer = rhs.timer
 		return this
 
-module.exports = [World, Player, Vec2, Bullet]
+module.exports = [World, Player, Bullet]

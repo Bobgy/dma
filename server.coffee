@@ -4,7 +4,8 @@ express = require('express')
 app = express()
 http = require('http').Server(app)
 io = require('socket.io')(http)
-[World, Player, Vec2, Bullet] = require('./js/core.js')
+[World, Player, Bullet] = require('./src/core.coffee')
+Vec2 = require('./src/Vec2.coffee')
 game = new World()
 
 # set routes

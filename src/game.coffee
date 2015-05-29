@@ -1,4 +1,5 @@
-[World, Player, Vec2, Bullet] = require('./core.coffee')
+[World, Player, Bullet] = require('./core.coffee')
+Vec2 = require('./Vec2.coffee')
 game = new World(PIXI)
 
 document.body.appendChild(game.renderer.view)
