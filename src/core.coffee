@@ -170,6 +170,35 @@ class Bullet extends Entity
 		@r = rhs.r
 		this
 
+# A container that is used to store Object with property 'valid'
+# It assumes objects pushed earlier will generall become 'invalid' earlier
+# and does garbage collection base on this.
+# @content should not be added additional property
+# Objects stored will be called the 'destroy()' function when destroyed
+class Container
+	# @ratio is the garbage collection ratio, default is 2
+	# a large ratio will cause garbage collection with a longer time cycle
+	constructor: (@ratio=2) ->
+		@content = []
+	push: (x) =>
+		@content.push(x)
+	# private
+	remove: (beginIndex, length) =>
+		temp = @content.splice(beginIndex, length)
+		for x in temp
+			x.destroy?()
+
+	# Automatic garbage collection inside forEach
+	forEach: (f) =>
+		firstValid = -1
+		for id, x of @content
+			if x.valid
+				f(x)
+				firstValid = id if firstValid == -1 and x.valid
+		firstValid = @content.length if firstValid == -1
+		if firstValid * @ratio > @content.length
+			@remove(0, firstValid)
+
 class Servant extends Entity
 	constructor: (pos=Vec2.zero, v=Vec2.zero, @cd=1000, @face=Vec2.zero) ->
 		super(new Vec2(pos.x, pos.y), new Vec2(v.x, v.y))
