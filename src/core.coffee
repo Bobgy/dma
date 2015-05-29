@@ -95,8 +95,6 @@ class Vec2
 	clone: =>
 		new Vec2(@x, @y)
 
-Vec2.zero = new Vec2(0, 0)
-
 class Entity
 	constructor: (@pos, @v) ->
 		@id = -1 #uninitilized value
@@ -120,7 +118,7 @@ class Player extends Entity
 	#               Shift,  A,  D,  S,  W,   /
 	keys		:	[  16, 65, 68, 83, 87, 191]
 	verbose		:	false
-	constructor: (@playerID=-1, pos=Vec2.zero, @face=Vec2.zero, v=Vec2.zero) ->
+	constructor: (@playerID=-1, pos=new Vec2(), @face=new Vec2(), v=new Vec2()) ->
 		super(pos, v)
 		@keyState = []
 		@type = 'Player'
@@ -139,7 +137,7 @@ class Player extends Entity
 		if @cd is 0
 			if @keyState[191]
 				@cd = 240
-				servant = new Servant(@pos, @v, 120, @face)
+				servant = new Servant(@pos, new Vec2(), 120, @face)
 				world.addEntity(servant)
 		else
 			@cd--
@@ -154,7 +152,7 @@ class Player extends Entity
 
 class Bullet extends Entity
 	collision: true
-	constructor: (@r=0, pos=Vec2.zero, v=Vec2.zero) ->
+	constructor: (@r=0, pos=new Vec2(), v=new Vec2()) ->
 		@type = 'Bullet'
 		super(pos, v)
 	update: (world) =>
@@ -199,8 +197,16 @@ class Container
 		if firstValid * @ratio > @content.length
 			@remove(0, firstValid)
 
+class Timer
+	constructor: (@parent, @wait) ->
+	update: (world) =>
+		if @wait
+			@wait--
+		else
+			@callback(@parent, world)
+
 class Servant extends Entity
-	constructor: (pos=Vec2.zero, v=Vec2.zero, @cd=1000, @face=Vec2.zero) ->
+	constructor: (pos=new Vec2(), v=new Vec2(), @cd=1000, @face=new Vec2()) ->
 		super(new Vec2(pos.x, pos.y), new Vec2(v.x, v.y))
 		@timer = 120
 		@type = 'Servant'

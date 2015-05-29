@@ -17,10 +17,6 @@ keys = [16, 65, 68, 83, 87, 191]
 
 game.run(7)
 
-center = new Vec2(game.w/2, game.h/2)
-game.addEntity(new Bullet(10, center, new Vec2(0.1, -0.2)))
-game.addEntity(new Bullet(10, center, new Vec2(0, 0)))
-
 synchronize = () -> io.emit('sync', game.players, game.entities)
 setInterval(synchronize, 14)
 
