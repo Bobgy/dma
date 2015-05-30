@@ -18,8 +18,8 @@ keys = [16, 65, 68, 83, 87, 191]
 
 game.run(7)
 
-synchronize = () -> io.emit('sync', game.players, game.entities)
-setInterval(synchronize, 5000)
+synchronize = () -> io.emit('sync', game.players, game.factions)
+setInterval(synchronize, 100)
 
 user_count = 0
 io.on('connection', (socket) ->

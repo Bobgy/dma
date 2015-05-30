@@ -23,57 +23,65 @@ class World
 		@tick = 0
 		@updating = false
 		@players = []
-		@entities = []
+		@factions = []
 		@user_count = 0
 
 	addPlayer: (player) ->
 		@players.push(player)
+		@factions.push([])
 		this
-	addEntity: (entity) ->
-		entity.id = @entities.push(entity) - 1
+	addEntity: (faction, entity) ->
+		entity.id = @factions[faction].push(entity) - 1
 		this
 	update: () =>
 		@updating = true
-		for entity in @entities
-			entity.update(this)
+		for entities in @factions
+			for entity in entities
+				entity.update(this)
 		for player in @players
 			player.update(this)
+			if player.valid
+				for id in [0..@factions.length-1]
+					entities = @factions[id]
+					if player.playerID isnt id
+						for servant in entities
+							for bullet in servant.pool.pool
+								if player.testCollision(bullet)
+									player.die()
+									bullet.die()
 		@tick++
 		@updating = false
 		this
 
-	importEntity: (entity) ->
+	importEntity: (container, entity) ->
 		texture = switch entity.type
 			when 'Player'
 				newEntity = EntityFactory(Player, entity)
-				@players.push(newEntity)
 				@texture_player
-			when 'Bullet'
-				console.log('Error Bullet!')
-				newEntity = EntityFactory(Bullet, entity)
-				@entities.push(newEntity)
-				@texture_bullet
 			when 'Servant'
 				newEntity = EntityFactory(Servant, entity)
 				@stage.addChild(newEntity.pool.initSprite(@texture_bullet, @PIXI)) if @PIXI?
-				@entities.push(newEntity)
 				@texture_servant
+		container.push(newEntity)
 		if PIXI?
 			sprite = new PIXI.Sprite(texture)
 			sprite.anchor.set(0.5, 0.5)
 			sprite.position = newEntity.pos
+			sprite.visible = newEntity.valid
 			@stage.addChild(sprite)
 			newEntity.sprite = sprite
 
-	sync: (players, entities) ->
+	sync: (players, factions) ->
 		@players = []
 		for sprite in @stage?.removeChildren()
 			sprite.destroy()
-		@entities = []
-		for entity in entities
-			@importEntity(entity)
+		@factions = []
+		for entities in factions
+			id = @factions.push([])
+			for entity in entities
+				@importEntity(@factions[id-1], entity)
 		for player in players
-			@importEntity(player)
+			@importEntity(@players, player)
 		this
 
 	keyAction: (user_id, isDown, keyCode) ->
@@ -99,11 +107,12 @@ class Entity
 		@pos = null
 		@v = null
 
-class Player extends Entity	
+class Player extends Entity
 	short_step	:	1.5
 	long_step	:	3
-	#               Shift,  A,  D,  S,  W,   /
-	keys		:	[  16, 65, 68, 83, 87, 191]
+	#      Shift,  A,  D,  S,  W,   /
+	keys : [  16, 65, 68, 83, 87, 191]
+	r: 5 # the collision radius
 	constructor: (@playerID=-1, pos=new Vec2(), @face=new Vec2(), v=new Vec2()) ->
 		super(pos, v)
 		@keyState = []
@@ -112,6 +121,7 @@ class Player extends Entity
 			@keyState[key] = false
 		@cd = 0
 	update: (world) ->
+		if not @valid then return this
 		step = if @keyState[16] then @short_step else @long_step
 		@v.x = (@keyState[68] - @keyState[65]) * step
 		@v.y = (@keyState[83] - @keyState[87]) * step
@@ -124,10 +134,13 @@ class Player extends Entity
 			if @keyState[191]
 				@cd = 240
 				servant = new Servant(@pos, new Vec2(), 120, @face)
-				world.addEntity(servant)
+				world.addEntity(@playerID, servant)
 		else
 			@cd--
 		this
+	die: ->
+		@valid = false
+		@sprite?.visible = false
 	copy: (rhs) ->
 		super(rhs)
 		@keyState = rhs.keyState
@@ -139,16 +152,18 @@ class Player extends Entity
 		@keyState.splice(0, keyState.length)
 		@keyState = null
 		super()
+	testCollision: (rhs) ->
+		return rhs.valid && (@pos.sub(rhs.pos)).length() < @r + rhs.r
 
 Player.create = (rhs) ->
 	(new Player()).copy(rhs)
 
 class Bullet extends Entity
-	collision: true
 	constructor: (pos=new Vec2(), v=new Vec2(), @r=0) ->
 		super(pos, v)
 		@type = 'Bullet'
 	update: (world) ->
+		if not @valid then return this
 		super()
 		# remove when out of screen
 		# if @pos.x < -@r or @pos.y < -@r or @pos.x > world.w + @r or @pos.y > world.h + @r
@@ -287,6 +302,7 @@ class Servant extends Entity
 		@pool = new BulletPool(8, new Bullet(new Vec2(), new Vec2(), 10))
 
 	update: (world) ->
+		if not @valid then return this
 		super()
 		if @timer is 0
 			@trigger?(world)
