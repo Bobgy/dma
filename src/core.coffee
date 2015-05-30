@@ -32,7 +32,7 @@ class World
 	addEntity: (entity) ->
 		entity.id = @entities.push(entity) - 1
 		this
-	update: () ->
+	update: () =>
 		@updating = true
 		for entity in @entities
 			entity.update(this)
@@ -61,7 +61,7 @@ class World
 		if PIXI?
 			sprite = new PIXI.Sprite(texture)
 			sprite.anchor.set(0.5, 0.5)
-			sprite.position.set(entity.pos.x, entity.pos.y)
+			sprite.position = newEntity.pos
 			@stage.addChild(sprite)
 			newEntity.sprite = sprite
 
@@ -165,6 +165,7 @@ class Bullet extends Entity
 	copyStatus: (rhs) ->
 		@valid = rhs.valid
 		@pos.copy(rhs.pos)
+		@v.copy(rhs.v)
 		this
 	copy: (rhs) ->
 		super(rhs)
@@ -283,7 +284,7 @@ class Servant extends Entity
 		super(new Vec2(pos.x, pos.y), new Vec2(v.x, v.y))
 		@timer = 120
 		@type = 'Servant'
-		@pool = new BulletPool(1, new Bullet(new Vec2(), new Vec2(), 10))
+		@pool = new BulletPool(8, new Bullet(new Vec2(), new Vec2(), 10))
 
 	update: (world) ->
 		super()

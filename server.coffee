@@ -19,12 +19,12 @@ keys = [16, 65, 68, 83, 87, 191]
 game.run(7)
 
 synchronize = () -> io.emit('sync', game.players, game.entities)
-setInterval(synchronize, 14)
+setInterval(synchronize, 5000)
 
 user_count = 0
 io.on('connection', (socket) ->
 	user_id = user_count++
-	user = 'user ' + user_id
+	user = 'user_' + user_id
 	socket.emit('user_id', user_id)
 	sockets.push(socket)
 	if user_id < 2
@@ -33,16 +33,16 @@ io.on('connection', (socket) ->
 		player = new Player(user_id, pos, face)
 		game.addPlayer(player)
 		socket.on('keyDown', (msg) ->
-			io.emit('keyDown', user_id, msg)
+			socket.broadcast.emit('keyDown', user_id, msg)
 			console.log(user + ' keyDown: ' + msg)
 			game.keyAction(user_id, true, msg)
 		)
 		socket.on('keyUp', (msg) ->
-			io.emit('keyUp', user_id, msg)
+			socket.broadcast.emit('keyUp', user_id, msg)
 			console.log(user + ' keyUp: ' + msg)
 			game.keyAction(user_id, false, msg)
 		)
-	socket.emit('sync', game.players, game.entities)
+	socket.broadcast.emit('sync', game.players, game.entities)
 	if user_id==1 then sockets[0].emit('sync', game.players)
 	console.log(user + ' connected')
 	socket.on('disconnect', ->
