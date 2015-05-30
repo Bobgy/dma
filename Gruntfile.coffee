@@ -13,6 +13,9 @@ module.exports = (grunt) ->
 			client:
 				src: 'src/game.coffee'
 				dest: 'js/game.js'
+			Vec2:
+				src: 'src/Vec2.coffee'
+				dest: 'js/Vec2.js'
 		coffeeify:
 			options:
 				debug: true

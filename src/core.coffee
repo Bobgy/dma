@@ -26,13 +26,13 @@ class World
 		@entities = []
 		@user_count = 0
 
-	addPlayer: (player) =>
+	addPlayer: (player) ->
 		@players.push(player)
 		this
-	addEntity: (entity) =>
+	addEntity: (entity) ->
 		entity.id = @entities.push(entity) - 1
 		this
-	update: () =>
+	update: () ->
 		@updating = true
 		for entity in @entities
 			entity.update(this)
@@ -42,7 +42,7 @@ class World
 		@updating = false
 		this
 
-	importEntity: (entity) =>
+	importEntity: (entity) ->
 		texture = switch entity.type
 			when 'Player'
 				newEntity = EntityFactory(Player, entity)
@@ -65,7 +65,7 @@ class World
 			@stage.addChild(sprite)
 			newEntity.sprite = sprite
 
-	sync: (players, entities) =>
+	sync: (players, entities) ->
 		@players = []
 		for sprite in @stage?.removeChildren()
 			sprite.destroy()
@@ -76,9 +76,9 @@ class World
 			@importEntity(player)
 		this
 
-	keyAction: (user_id, isDown, keyCode) =>
+	keyAction: (user_id, isDown, keyCode) ->
 		@players[user_id].keyState[keyCode] = isDown
-	run: (interval) =>
+	run: (interval) ->
 		setInterval(@update, interval)
 		@animate?()
 
@@ -86,16 +86,16 @@ class Entity
 	constructor: (@pos, @v) ->
 		@id = -1 #uninitilized value
 		@valid = true
-	update: =>
+	update: ->
 		@pos.copy(@pos.add(@v))
 		# @sprite?.position.set(@pos.x, @pos.y)
 		this
-	copy: (rhs) =>
+	copy: (rhs) ->
 		@pos.copy(rhs.pos)
 		@v.copy(rhs.v)
 		@id = rhs.id
 		@valid = rhs.valid
-	destroy: =>
+	destroy: ->
 		@pos = null
 		@v = null
 
@@ -111,7 +111,7 @@ class Player extends Entity
 		for key in @keys
 			@keyState[key] = false
 		@cd = 0
-	update: (world) =>
+	update: (world) ->
 		step = if @keyState[16] then @short_step else @long_step
 		@v.x = (@keyState[68] - @keyState[65]) * step
 		@v.y = (@keyState[83] - @keyState[87]) * step
@@ -128,13 +128,13 @@ class Player extends Entity
 		else
 			@cd--
 		this
-	copy: (rhs) =>
+	copy: (rhs) ->
 		super(rhs)
 		@keyState = rhs.keyState
 		@cd = rhs.cd
 		@playerID = rhs.playerID
 		this
-	destroy: =>
+	destroy: ->
 		@face = null
 		@keyState.splice(0, keyState.length)
 		@keyState = null
@@ -148,29 +148,29 @@ class Bullet extends Entity
 	constructor: (pos=new Vec2(), v=new Vec2(), @r=0) ->
 		super(pos, v)
 		@type = 'Bullet'
-	update: (world) =>
+	update: (world) ->
 		super()
 		# remove when out of screen
 		# if @pos.x < -@r or @pos.y < -@r or @pos.x > world.w + @r or @pos.y > world.h + @r
 		if @pos.x < @r or @pos.y < @r or @pos.x > world.w - @r or @pos.y > world.h - @r
 			@die()
 		this
-	clone: => new Bullet(@pos.clone(), @v.clone(), @r)
-	die: =>
+	clone: -> new Bullet(@pos.clone(), @v.clone(), @r)
+	die: ->
 		@valid = false
 		@sprite?.visible = false
-	wake: =>
+	wake: ->
 		@valid = true
 		@sprite?.visible = true
-	copyStatus: (rhs) =>
+	copyStatus: (rhs) ->
 		@valid = rhs.valid
 		@pos.copy(rhs.pos)
 		this
-	copy: (rhs) =>
+	copy: (rhs) ->
 		super(rhs)
 		@r = rhs.r
 		this
-	destroy: =>
+	destroy: ->
 		@r = null
 		super()
 
@@ -196,7 +196,7 @@ class BulletPool
 
 	# @param texture {PIXI.Texture}: the texture used to create sprites
 	# @param PIXI {optional}: the module, left empty to initialize a bulletPool without graphics
-	initSprite: (texture, PIXI) =>
+	initSprite: (texture, PIXI) ->
 		@spritePool = new PIXI.Container()
 		for bullet in @pool
 			sprite = new PIXI.Sprite(texture)
@@ -209,7 +209,7 @@ class BulletPool
 
 	# update the bullets when bullet.valid = true
 	# @param world {World}: handle to the world
-	update: (world) =>
+	update: (world) ->
 		for bullet in @pool
 			if bullet.valid
 				bullet.update(world)
@@ -217,22 +217,22 @@ class BulletPool
 
 	# find the first empty slot (with an invalid bullet) in the pool
 	# @return bullet {Bullet}, bullet.valid means not found
-	findFirstEmptySlot: =>
+	findFirstEmptySlot: ->
 		for bullet in @pool
 			if not bullet.valid then return bullet
 		return @pool[0]
 
-	destroy: =>
+	destroy: ->
 		@pool = null
 		@spritePool?.destroy(true)
 		@spritePool = null
 
-	copy: (rhs) =>
+	copy: (rhs) ->
 		for bullet in @pool
 			bullet.copyStatus(rhs.pool[bullet.id])
 		this
 
-BulletPool.create = (rhs) =>
+BulletPool.create = (rhs) ->
 	bullet = Bullet.copy(rhs.pool[0])
 	bulletPool = new BulletPool(rhs.pool.length, bullet)
 	return bulletPool.copy(rhs)
@@ -247,16 +247,16 @@ class Container
 	# a large ratio will cause garbage collection with a longer time cycle
 	constructor: (@ratio=2) ->
 		@content = []
-	push: (x) =>
+	push: (x) ->
 		@content.push(x)
 	# private
-	remove: (beginIndex, length) =>
+	remove: (beginIndex, length) ->
 		temp = @content.splice(beginIndex, length)
 		for x in temp
 			x.destroy?()
 
 	# Automatic garbage collection inside forEach
-	forEach: (f) =>
+	forEach: (f) ->
 		firstValid = -1
 		for id, x of @content
 			if x.valid
@@ -268,7 +268,7 @@ class Container
 
 class Timer
 	constructor: (@parent, @wait) ->
-	update: (world) =>
+	update: (world) ->
 		if @wait
 			@wait--
 		else
@@ -285,7 +285,7 @@ class Servant extends Entity
 		@type = 'Servant'
 		@pool = new BulletPool(1, new Bullet(new Vec2(), new Vec2(), 10))
 
-	update: (world) =>
+	update: (world) ->
 		super()
 		if @timer is 0
 			@trigger?(world)
@@ -294,7 +294,7 @@ class Servant extends Entity
 		@pool.update(world)
 		return this
 
-	trigger: (world) =>
+	trigger: (world) ->
 		@timer = @cd
 		bullet = @pool.findFirstEmptySlot()
 		if not bullet.valid
@@ -305,7 +305,7 @@ class Servant extends Entity
 			console.log('BulletPool is full!')
 		return this
 
-	copy: (rhs) =>
+	copy: (rhs) ->
 		super(rhs)
 		@cd = rhs.cd
 		@face.copy(rhs.face)
@@ -313,7 +313,7 @@ class Servant extends Entity
 		@pool.copy(rhs.pool)
 		return this
 
-	destroy: =>
+	destroy: ->
 		@pool.destroy()
 		@pool = null
 		@face = null
