@@ -20,7 +20,7 @@ class Player extends Entity
 		step = if @keyState[16] then @short_step else @long_step
 		@v.x = (@keyState[68] - @keyState[65]) * step
 		@v.y = (@keyState[83] - @keyState[87]) * step
-		super()
+		super(world)
 		@pos.x = Math.max(20, @pos.x)
 		@pos.y = Math.max(20, @pos.y)
 		@pos.x = Math.min(world.w-20, @pos.x)
@@ -31,11 +31,8 @@ class Player extends Entity
 				servant = new Servant(@pos, new Vec2(), 120, @face)
 				world.addEntity(@playerID, servant)
 				if PIXI?
-					sprite = new PIXI.Sprite(world.assets['Servant'].texture)
-					sprite.anchor.set(0.5, 0.5)
-					sprite.position = servant.pos
-					servant.sprite = sprite
-					world.stage.addChild(sprite)
+					servant.initSprite(world.assets['Servant'].texture, PIXI)
+					world.stage.addChild(servant.components.sprite)
 					spritePool = servant.pool.initSprite(world.assets['Bullet'].texture, PIXI)
 					world.stage.addChild(spritePool)
 		else
@@ -43,7 +40,7 @@ class Player extends Entity
 		this
 	die: ->
 		@valid = false
-		@sprite?.visible = false
+		@components.sprite?.visible = false
 	copy: (rhs) ->
 		super(rhs)
 		@keyState = rhs.keyState

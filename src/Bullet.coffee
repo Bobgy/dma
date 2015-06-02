@@ -5,6 +5,7 @@ class Bullet extends Entity
 	constructor: (pos=new Vec2(), v=new Vec2(), @r=0) ->
 		super(pos, v)
 		@type = 'Bullet'
+
 	update: (world) ->
 		if not @valid then return this
 		super()
@@ -12,30 +13,40 @@ class Bullet extends Entity
 		# if @pos.x < -@r or @pos.y < -@r or @pos.x > world.w + @r or @pos.y > world.h + @r
 		if @pos.x < @r or @pos.y < @r or @pos.x > world.w - @r or @pos.y > world.h - @r
 			@die()
-		this
-	clone: -> new Bullet(@pos.clone(), @v.clone(), @r)
+		return this
+
+	clone: ->
+		bullet = new Bullet(@pos.clone(), @v.clone(), @r)
+		return bullet.copyComponents(this)
+
 	die: ->
 		@valid = false
-		@sprite?.visible = false
+		@components.sprite?.visible = false
+		return this
+
 	wake: ->
 		@valid = true
-		@sprite?.visible = true
+		@components.sprite?.visible = true
+		return this
+
 	copyStatus: (rhs) ->
 		@valid = rhs.valid
 		@pos.copy(rhs.pos)
 		@v.copy(rhs.v)
-		this
+		return this
+
 	copy: (rhs) ->
 		super(rhs)
 		@r = rhs.r
-		this
+		return this
+
 	destroy: ->
-		@r = null
 		super()
+		@r = null
 
 Bullet.create = (rhs) ->
 	bullet = new Bullet(rhs.pos.clone(), rhs.v.clone(), rhs.r)
 	bullet.valid = rhs.valid
-	return bullet
+	return bullet.copyComponents(rhs)
 
 module.exports = Bullet

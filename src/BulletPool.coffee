@@ -14,20 +14,21 @@ class BulletPool
 			@pool[i] = bullet.clone()
 			@pool[i].id = i;
 			@pool[i].valid = false
+		@components = Object.create(null)
 		@type = 'BulletPool'
 
 	# @param texture {PIXI.Texture}: the texture used to create sprites
-	# @param PIXI {optional}: the module, left empty to initialize a bulletPool without graphics
+	# @param PIXI {optional}: the module, left empty to initialize a bulletPool
+	# without graphics
 	initSprite: (texture, PIXI) ->
-		@spritePool = new PIXI.Container()
+		if @components.spritePool?
+			console.log('BulletPool has already been initialized.')
+			return null
+		spritePool = @components.spritePool = new PIXI.Container()
 		for bullet in @pool
-			sprite = new PIXI.Sprite(texture)
-			sprite.anchor.set(0.5, 0.5)
-			sprite.position = bullet.pos
-			sprite.visible = bullet.valid
-			bullet.sprite = sprite
-			@spritePool.addChild(sprite)
-		return @spritePool
+			bullet.initSprite(texture, PIXI)
+			spritePool.addChild(bullet.components.sprite)
+		return spritePool
 
 	# update the bullets when bullet.valid = true
 	# @param world {World}: handle to the world
@@ -35,7 +36,7 @@ class BulletPool
 		for bullet in @pool
 			if bullet.valid
 				bullet.update(world)
-		this
+		return this
 
 	# find the first empty slot (with an invalid bullet) in the pool
 	# @return bullet {Bullet}, bullet.valid means not found
@@ -46,16 +47,22 @@ class BulletPool
 
 	destroy: ->
 		@pool = null
-		@spritePool?.destroy(true)
-		@spritePool = null
+		@components.spritePool?.destroy(true)
+		delete @components.spritePool
+		@components = null
 
 	copy: (rhs) ->
 		for bullet in @pool
 			bullet.copyStatus(rhs.pool[bullet.id])
-		this
+			      .copyComponents(rhs.pool[bullet.id])
+		for key, value of rhs.components
+			if value.copyable
+				@components[key] = value.clone()
+		return this
 
 BulletPool.create = (rhs) ->
-	bullet = Bullet.copy(rhs.pool[0])
+	bullet = new Bullet()
+	bullet.copy(rhs.pool[0])
 	bulletPool = new BulletPool(rhs.pool.length, bullet)
 	return bulletPool.copy(rhs)
 

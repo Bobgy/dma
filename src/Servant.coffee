@@ -12,11 +12,12 @@ class Servant extends Entity
 		super(new Vec2(pos.x, pos.y), new Vec2(v.x, v.y))
 		@timer = 120
 		@type = 'Servant'
-		@pool = new BulletPool(8, new Bullet(new Vec2(), new Vec2(), 10))
+		bullet = new Bullet(new Vec2(), new Vec2(), 10)
+		@pool = new BulletPool(8, bullet)
 
 	update: (world) ->
 		if not @valid then return this
-		super()
+		super(world)
 		if @timer is 0
 			@trigger?(world)
 		else
