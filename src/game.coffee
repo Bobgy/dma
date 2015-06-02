@@ -1,5 +1,5 @@
-[World, Player, Bullet] = require('./core.coffee')
 Vec2 = require('./Vec2.coffee')
+World = require('./World.coffee')
 Loader = require('./AssetsLoader.coffee')
 game = new World(PIXI)
 loader = new Loader(game)

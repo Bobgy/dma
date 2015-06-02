@@ -1,12 +1,14 @@
 path = require('path')
-
 express = require('express')
 app = express()
 http = require('http').Server(app)
 io = require('socket.io')(http)
-[World, Player, Bullet] = require('./src/core.coffee')
+
 Vec2 = require('./src/Vec2.coffee')
-game = new World()
+Player = require('./src/Player.coffee')
+Bullet = require('./src/Bullet.coffee')
+World = require('./src/World.coffee')
+game = new World
 
 # set routes
 app.use('/', express.static(path.join(__dirname, 'public')))
