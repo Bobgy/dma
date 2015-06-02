@@ -33,6 +33,7 @@ class Timer extends Ticker
         @tick = 0
       else
         @valid = false
+        delete parent.components[@name]
       @callback(world, parent)
     return this
   copy: (rhs) ->
