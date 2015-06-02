@@ -22,10 +22,10 @@ class Timer extends Ticker
 	# @param periodic {boolean}
 	# @param currentTick {int}
 	constructor: (@name='', @interval=0, @callback, @periodic=true, currentTick=0) ->
-		super(name, currentTick)
+		super(@name, currentTick)
 		@copyable = true
 	update: (world, parent) ->
-		return unless @valid
+		return this unless @valid
 		super()
 		if @tick == @interval
 			if @periodic

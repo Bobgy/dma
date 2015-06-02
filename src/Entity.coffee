@@ -2,31 +2,33 @@ class Entity
 	constructor: (@pos, @v) ->
 		@id = -1 #uninitilized value
 		@valid = true
-		@components = Object.create(null)
+		@components = new Object()
+		# Object.create(null) will make socket.io unable to send this object
 	update: (world) ->
 		@pos.copy(@pos.add(@v))
-		for component in @components
+		for name, component of @components
 			component.update?(world, this)
-		this
+		return this
 	copy: (rhs) ->
 		@pos.copy(rhs.pos)
 		@v.copy(rhs.v)
 		@id = rhs.id
 		@valid = rhs.valid
+		return @copyComponents(rhs)
 	clone: (rhs) ->
 		new Entity(@pos.clone(), @v.clone())
 	copyComponents: (rhs) ->
-		for key, value of rhs.components
-			if value.copyable
-				if @components[key]?
-					@components[key].copy(value)
+		for name, component of rhs.components
+			if component.copyable
+				if @components[name]?
+					@components[name].copy(component)
 				else
-					@components[key] = value.clone()
+					@components[name] = component.clone()
 		return this
 	destroy: ->
 		@pos = null
 		@v = null
-		for component in @components
+		for name, component of @components
 			component.destroy?()
 		@components = null
 	initSprite: (texture, PIXI) ->

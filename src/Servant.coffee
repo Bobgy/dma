@@ -2,6 +2,7 @@ Vec2 = require('./Vec2.coffee')
 Entity = require('./Entity.coffee')
 Bullet = require('./Bullet.coffee')
 BulletPool = require('./BulletPool.coffee')
+Timer = require('./Timer.coffee')
 
 class Servant extends Entity
 	# @param pos {Vec2}
@@ -10,27 +11,22 @@ class Servant extends Entity
 	# @param face {Vec2}
 	constructor: (pos=new Vec2(), v=new Vec2(), @cd=1000, @face=new Vec2()) ->
 		super(new Vec2(pos.x, pos.y), new Vec2(v.x, v.y))
-		@timer = 120
 		@type = 'Servant'
 		bullet = new Bullet(new Vec2(), new Vec2(), 10)
 		@pool = new BulletPool(8, bullet)
+		@components.fireTimer = new Timer('fireTimer', @cd, @fire, true, -60)
 
 	update: (world) ->
-		if not @valid then return this
+		return this unless @valid
 		super(world)
-		if @timer is 0
-			@trigger?(world)
-		else
-			@timer--
 		@pool.update(world)
 		return this
 
-	trigger: (world) ->
-		@timer = @cd
-		bullet = @pool.findFirstEmptySlot()
+	fire: (world, parent) ->
+		bullet = parent.pool.findFirstEmptySlot()
 		if not bullet.valid
-			bullet.pos.copy(@pos.add(@face))
-			bullet.v.copy(@face)
+			bullet.pos.copy(parent.pos.add(parent.face))
+			bullet.v.copy(parent.face)
 			bullet.wake()
 		else
 			console.log('BulletPool is full!')

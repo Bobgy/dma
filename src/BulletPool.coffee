@@ -55,9 +55,9 @@ class BulletPool
 		for bullet in @pool
 			bullet.copyStatus(rhs.pool[bullet.id])
 			      .copyComponents(rhs.pool[bullet.id])
-		for key, value of rhs.components
-			if value.copyable
-				@components[key] = value.clone()
+		for name, component of rhs.components
+			if component.copyable
+				@components[name] = component.clone()
 		return this
 
 BulletPool.create = (rhs) ->
