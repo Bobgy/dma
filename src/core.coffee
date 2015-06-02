@@ -17,9 +17,7 @@ class World
 			@texture_player = @PIXI.Texture.fromImage('assets/bunny.png')
 			@texture_bullet = @PIXI.Texture.fromImage('assets/bullet.png')
 			@texture_servant = @PIXI.Texture.fromImage('assets/servant.png')
-			@animate = =>
-				requestAnimationFrame(@animate)
-				@renderer.render(@stage)
+			@animate = => @renderer.render(@stage)
 		@tick = 0
 		@updating = false
 		@players = []
@@ -50,6 +48,7 @@ class World
 									player.die()
 									bullet.die()
 		@tick++
+		if @PIXI? then requestAnimationFrame(@animate)
 		@updating = false
 		this
 
