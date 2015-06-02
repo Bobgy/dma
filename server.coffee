@@ -25,33 +25,33 @@ setInterval(synchronize, 2000)
 
 user_count = 0
 io.on('connection', (socket) ->
-	user_id = user_count++
-	user = 'user_' + user_id
-	socket.emit('user_id', user_id)
-	sockets.push(socket)
-	if user_id < 2
-		pos = new Vec2(300, if user_id then 500 else 100)
-		face = new Vec2(0, if user_id then -1 else 1)
-		player = new Player(user_id, pos, face)
-		game.addPlayer(player)
-		socket.on('keyDown', (msg) ->
-			socket.broadcast.emit('keyDown', user_id, msg)
-			console.log(user + ' keyDown: ' + msg)
-			game.keyAction(user_id, true, msg)
-		)
-		socket.on('keyUp', (msg) ->
-			socket.broadcast.emit('keyUp', user_id, msg)
-			console.log(user + ' keyUp: ' + msg)
-			game.keyAction(user_id, false, msg)
-		)
-	socket.broadcast.emit('sync', game.players, game.entities)
-	if user_id==1 then sockets[0].emit('sync', game.players)
-	console.log(user + ' connected')
-	socket.on('disconnect', ->
-		console.log(user + ' disconnected')
-	)
+  user_id = user_count++
+  user = 'user_' + user_id
+  socket.emit('user_id', user_id)
+  sockets.push(socket)
+  if user_id < 2
+    pos = new Vec2(300, if user_id then 500 else 100)
+    face = new Vec2(0, if user_id then -1 else 1)
+    player = new Player(user_id, pos, face)
+    game.addPlayer(player)
+    socket.on('keyDown', (msg) ->
+      socket.broadcast.emit('keyDown', user_id, msg)
+      console.log(user + ' keyDown: ' + msg)
+      game.keyAction(user_id, true, msg)
+    )
+    socket.on('keyUp', (msg) ->
+      socket.broadcast.emit('keyUp', user_id, msg)
+      console.log(user + ' keyUp: ' + msg)
+      game.keyAction(user_id, false, msg)
+    )
+  socket.broadcast.emit('sync', game.players, game.entities)
+  if user_id==1 then sockets[0].emit('sync', game.players)
+  console.log(user + ' connected')
+  socket.on('disconnect', ->
+    console.log(user + ' disconnected')
+  )
 )
 
 http.listen(3000, () ->
-	console.log('listening on *:3000')
+  console.log('listening on *:3000')
 )
