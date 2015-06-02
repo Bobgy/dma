@@ -1,7 +1,9 @@
 [World, Player, Bullet] = require('./core.coffee')
 Vec2 = require('./Vec2.coffee')
+Loader = require('./AssetsLoader.coffee')
 game = new World(PIXI)
-
+loader = new Loader(game)
+loader.load()
 document.body.appendChild(game.renderer.view)
 
 socket = io()
@@ -47,6 +49,3 @@ upKeyCode = (e) ->
 			karr[keyCode] = false
 			socket.emit('keyUp', keyCode)
 document.onkeyup = upKeyCode
-
-# start animating
-game.run(7)

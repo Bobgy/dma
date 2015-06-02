@@ -9,14 +9,8 @@ class World
 		if @PIXI?
 			@renderer = @PIXI.autoDetectRenderer(@w, @h,
 							{backgroundColor : 0x66ccff})
-
 			# create the root of the scene graph
 			@stage = new @PIXI.Container()
-
-			# create a texture from an image path
-			@texture_player = @PIXI.Texture.fromImage('assets/bunny.png')
-			@texture_bullet = @PIXI.Texture.fromImage('assets/bullet.png')
-			@texture_servant = @PIXI.Texture.fromImage('assets/servant.png')
 			@animate = => @renderer.render(@stage)
 		@tick = 0
 		@updating = false
@@ -53,14 +47,10 @@ class World
 		this
 
 	importEntity: (container, entity) ->
-		texture = switch entity.type
-			when 'Player'
-				newEntity = EntityFactory(Player, entity)
-				@texture_player
-			when 'Servant'
-				newEntity = EntityFactory(Servant, entity)
-				@stage.addChild(newEntity.pool.initSprite(@texture_bullet, @PIXI)) if @PIXI?
-				@texture_servant
+		newEntity = EntityFactory(eval(entity.type), entity)
+		if entity.type is 'Servant'
+			@stage.addChild(newEntity.pool.initSprite(@assets['Bullet'].texture, PIXI))
+		texture = @assets[entity.type].texture
 		container.push(newEntity)
 		if PIXI?
 			sprite = new PIXI.Sprite(texture)
@@ -87,7 +77,6 @@ class World
 		@players[user_id].keyState[keyCode] = isDown
 	run: (interval) ->
 		setInterval(@update, interval)
-		@animate?()
 
 class Entity
 	constructor: (@pos, @v) ->
@@ -134,6 +123,14 @@ class Player extends Entity
 				@cd = 240
 				servant = new Servant(@pos, new Vec2(), 120, @face)
 				world.addEntity(@playerID, servant)
+				if PIXI?
+					sprite = new PIXI.Sprite(world.assets['Servant'].texture)
+					sprite.anchor.set(0.5, 0.5)
+					sprite.position = servant.pos
+					servant.sprite = sprite
+					world.stage.addChild(sprite)
+					spritePool = servant.pool.initSprite(world.assets['Bullet'].texture, PIXI)
+					world.stage.addChild(spritePool)
 		else
 			@cd--
 		this
@@ -145,6 +142,7 @@ class Player extends Entity
 		@keyState = rhs.keyState
 		@cd = rhs.cd
 		@playerID = rhs.playerID
+		@face = rhs.face
 		this
 	destroy: ->
 		@face = null
