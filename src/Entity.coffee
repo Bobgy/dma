@@ -18,7 +18,10 @@ class Entity
 	copyComponents: (rhs) ->
 		for key, value of rhs.components
 			if value.copyable
-				@components[key] = value.clone()
+				if @components[key]?
+					@components[key].copy(value)
+				else
+					@components[key] = value.clone()
 		return this
 	destroy: ->
 		@pos = null
