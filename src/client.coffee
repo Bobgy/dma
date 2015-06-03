@@ -17,17 +17,21 @@ socket.on('user_id', (msg) ->
   id = msg
 )
 socket.on('sync', (players, entities, tick) ->
-  game.sync(players, entities)
+  console.log('sync, server:', tick, 'client:',
+              game.tick, 'delta:', tick-game.tick)
+  game.components.eventEmitter.pushEvent('sync', tick, players, entities, tick)
 )
-socket.on('keyDown', (user_id, msg) ->
-  console.log(user_id + ' keyDown ' + msg)
+socket.on('keyDown', (user_id, msg, tick) ->
+  console.log(user_id, 'keyDown', msg)
+  console.log('sent at', tick, ', received at', game.tick)
   if not (user_id == id)
-    game.keyAction(user_id, true, msg)
+    game.components.eventEmitter.pushEvent('key', tick, user_id, true, msg)
 )
-socket.on('keyUp', (user_id, msg) ->
+socket.on('keyUp', (user_id, msg, tick) ->
   console.log(user_id + ' keyUp ' + msg)
+  console.log('sent at', tick, ', received at', game.tick)
   if not (user_id == id)
-    game.keyAction(user_id, false, msg)
+    game.components.eventEmitter.pushEvent('key', tick, user_id, false, msg)
 )
 downKeyCode = (e) ->
   evt = e || window.event
@@ -35,9 +39,10 @@ downKeyCode = (e) ->
   switch keyCode
     when 87, 65, 83, 68, 16, 191 # w, a, s, d, shift, /
       if not karr[keyCode]
-        if id < 2 then game.keyAction(id, true, keyCode)
+        if id < 2
+          game.keyAction(id, true, keyCode)
+          socket.emit('keyDown', keyCode, game.tick + 1)
         karr[keyCode] = true
-        socket.emit('keyDown', keyCode, game.tick + 1)
 document.onkeydown = downKeyCode
 
 upKeyCode = (e) ->
@@ -45,7 +50,8 @@ upKeyCode = (e) ->
   keyCode = evt.KeyCode || evt.which || evt.charCode
   switch keyCode
     when 87, 65, 83, 68, 16, 191 # w, a, s, d, shift, /
-      if id < 2 then game.keyAction(id, false, keyCode)
+      if id < 2
+        game.keyAction(id, false, keyCode)
+        socket.emit('keyUp', keyCode, game.tick + 1)
       karr[keyCode] = false
-      socket.emit('keyUp', keyCode, game.tick + 1)
 document.onkeyup = upKeyCode

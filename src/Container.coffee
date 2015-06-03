@@ -7,6 +7,15 @@ class Container
     @cnt = 0
     @type = 'Container'
 
+  # earlyUpdate will be called recursively over all components
+  # @param world {Container*}: the root container
+  # @param parent {Container*}: the parent container
+  # @return this
+  earlyUpdate: (world, parent) ->
+    for id, component of @components
+      component.earlyUpdate?(world, this)
+    return this
+
   # update will be called recursively over all components
   # @param world {Container*}: the root container
   # @param parent {Container*}: the parent container

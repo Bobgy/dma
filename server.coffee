@@ -8,7 +8,7 @@ Vec2 = require('./src/Vec2.coffee')
 Player = require('./src/Player.coffee')
 Bullet = require('./src/Bullet.coffee')
 World = require('./src/World.coffee')
-game = new World
+game = new World()
 
 # set routes
 app.use('/', express.static(path.join(__dirname, 'public')))
@@ -18,9 +18,14 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')))
 sockets = []
 keys = [16, 65, 68, 83, 87, 191]
 
-game.run(15)
+game.run(7)
 
-synchronize = () -> io.emit('sync', game.players, game.factions, game.tick)
+synchronize = () ->
+  pred = game.clone()
+  for i in [1..8]
+    pred.update()
+  console.log('sync...')
+  io.emit('sync', pred.players, pred.factions, pred.tick)
 setInterval(synchronize, 2000)
 
 user_count = 0
@@ -34,15 +39,19 @@ io.on('connection', (socket) ->
     face = new Vec2(0, if user_id then -1 else 1)
     player = new Player(user_id, pos, new Vec2(), face)
     game.addPlayer(player)
-    socket.on('keyDown', (msg, tick) ->
-      socket.broadcast.emit('keyDown', user_id, msg)
-      console.log(user + ' keyDown: ' + msg)
-      game.keyAction(user_id, true, msg)
+    socket.on('keyDown', (keyCode, tick) ->
+      socket.broadcast.emit('keyDown', user_id, keyCode, tick)
+      console.log(user, 'keyDown', keyCode)
+      console.log('sent at', tick, ', received at', game.tick)
+      game.components.eventEmitter.pushEvent(
+          'key', tick, user_id, true, keyCode)
     )
-    socket.on('keyUp', (msg, tick) ->
-      socket.broadcast.emit('keyUp', user_id, msg)
-      console.log(user + ' keyUp: ' + msg)
-      game.keyAction(user_id, false, msg)
+    socket.on('keyUp', (keyCode, tick) ->
+      socket.broadcast.emit('keyUp', user_id, keyCode, tick)
+      console.log(user, 'keyUp', keyCode)
+      console.log('sent at', tick, ', received at', game.tick)
+      game.components.eventEmitter.pushEvent(
+          'key', tick, user_id, false, keyCode)
     )
   socket.broadcast.emit('sync', game.players, game.entities)
   if user_id==1 then sockets[0].emit('sync', game.players)

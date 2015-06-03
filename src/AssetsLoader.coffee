@@ -7,11 +7,10 @@ class AssetsLoader
 		       .add('Servant', 'assets/servant.png')
 		       .add('Player', 'assets/bunny.png')
 		@loader.once('complete', @onAssetsLoaded)
-	load: ->
-		@loader.load()
+	load: -> @loader.load()
 	onAssetsLoaded: =>
 		console.log('Assets are loaded.')
 		@game.assets = @loader.resources
-		@game.run(15)
+		@game.run(7)
 
 module.exports = AssetsLoader

@@ -5,6 +5,7 @@ Pool = require('./Pool.coffee')
 Servant = require('./Servant.coffee')
 Player = require('./Player.coffee')
 Container = require('./Container.coffee')
+EventEmitter = require('./EventEmitter.coffee')
 
 EntityFactory = (type, entity) -> type.create(entity)
 
@@ -16,13 +17,15 @@ class World extends Container
     @tick = 0
     @players = []
     @factions = [new Container(0), new Container(1)]
-    @user_count = 0
+    @components.eventEmitter = new EventEmitter()
     if @PIXI?
       @renderer = @PIXI.autoDetectRenderer(@w, @h,
               {backgroundColor : 0x66ccff})
       # create the root of the scene graph
       @stage = new @PIXI.Container()
       @animate = => @renderer.render(@stage)
+    @lastTime = Date.now()
+    @lastTick = @tick
 
   addPlayer: (player) ->
     len = @players.push(player)
@@ -34,13 +37,14 @@ class World extends Container
     entity.faction = faction
     return this
 
-  update: () =>
+  update: =>
+    @tick++
+    @earlyUpdate(this)
     for player in @players
       player.update(this)
     for entities in @factions
       entities.update(this)
     super(this)
-    @tick++
     if @PIXI? then requestAnimationFrame(@animate)
     return this
 
@@ -59,10 +63,12 @@ class World extends Container
       @stage.addChild(newEntity.components.sprite)
     return this
 
-  sync: (players, factions) ->
+  sync: (players, factions, tick) ->
+    @tick = tick
     @players = []
-    for sprite in @stage?.removeChildren()
-      sprite.destroy()
+    if @stage?
+      for sprite in @stage.removeChildren()
+        sprite.destroy()
     @factions = [new Container(0), new Container(1)]
     i = 0
     for faction in factions
@@ -73,10 +79,26 @@ class World extends Container
       @importEntity(@players, player)
     return this
 
+  copy: (rhs) ->
+    super(rhs)
+    @sync(rhs.players, rhs.factions, rhs.tick)
+    return this
+
   keyAction: (user_id, isDown, keyCode) ->
     @players[user_id].keyState[keyCode] = isDown
 
+  logFPS: =>
+    FPS = (@tick - @lastTick)/(Date.now() - @lastTime)*1000
+    @lastTick = @tick
+    @lastTime = Date.now()
+    console.log('FPS:', FPS)
+
   run: (interval) ->
+    @components.eventEmitter.on('key', @keyAction)
+    @components.eventEmitter.on('sync', @sync)
     setInterval(@update, interval)
+    setInterval(@logFPS, 1000)
+
+  clone: -> (new World()).copy(this)
 
 module.exports = World
