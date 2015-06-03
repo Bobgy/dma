@@ -32,7 +32,7 @@ io.on('connection', (socket) ->
   if user_id < 2
     pos = new Vec2(300, if user_id then 500 else 100)
     face = new Vec2(0, if user_id then -1 else 1)
-    player = new Player(user_id, pos, face)
+    player = new Player(user_id, pos, new Vec2(), face)
     game.addPlayer(player)
     socket.on('keyDown', (msg) ->
       socket.broadcast.emit('keyDown', user_id, msg)

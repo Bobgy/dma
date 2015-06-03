@@ -4,11 +4,13 @@
 # When the skill is cast, `cast(world, parent)` will be called.
 # Inherit from this class and overide cast to add your own skill
 class Skill
-  # @param name {string}
+  # @param id {string}
   # @param coolDown {int}
   # @param manaCost {int}
   # @param currentTick {int}
-  constructor: (@name='', @coolDown=120, @manaCost=240, @currentTick=0) ->
+  constructor: (@id, @coolDown=120, @manaCost=240, @currentTick=0) ->
+    @copyable = true
+
   update: (world, parent) ->
     @currentTick-- if @currentTick
     if @currentTick is 0 and
@@ -24,11 +26,11 @@ class Skill
     return this
 
   clone: ->
-    skill = new Skill(@name, @coolDown, @manaCost, @currentTick)
+    skill = new Skill(@id, @coolDown, @manaCost, @currentTick)
     return this
 
   copy: (rhs) ->
-    @name = rhs.name
+    @id = rhs.id
     @coolDown = rhs.coolDown
     @manaCost = rhs.manaCost
     @currentTick = rhs.currentTick

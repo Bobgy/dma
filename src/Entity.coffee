@@ -1,41 +1,53 @@
-class Entity
-  constructor: (@pos, @v) ->
-    @id = -1 #uninitilized value
+Container = require('./Container.coffee')
+
+# the basic entity of a game
+# contains id, position, velocity and its components
+# note: remember to check this.valid before updating
+class Entity extends Container
+  # @param id {string}
+  # @param pos {Vec2}: position
+  # @param v {Vec2}: velocity
+  constructor: (id, @pos, @v) ->
+    super(id)
     @valid = true
-    @components = new Object()
-    # Object.create(null) will make socket.io unable to send this object
-  update: (world) ->
-    @pos.copy(@pos.add(@v))
-    for name, component of @components
-      component.update?(world, this)
-    return this
+    @type = 'Entity'
+
+  # @param world {Container*}
+  # @param parent {Container*}
+  # @return this
+  update: (world, parent) ->
+    return this unless @valid
+    @pos.set(@pos.x + @v.x, @pos.y + @v.y)
+    return super(world, parent)
+
+  # @param rhs {Entity*}
+  # @return this
   copy: (rhs) ->
+    super(rhs)
     @pos.copy(rhs.pos)
     @v.copy(rhs.v)
-    @id = rhs.id
     @valid = rhs.valid
-    return @copyComponents(rhs)
-  clone: ->
-    entity = new Entity(new Vec2(), new Vec2())
-    return entity.copy(this)
-  copyComponents: (rhs) ->
-    for name, component of rhs.components
-      if component.copyable
-        if @components[name]?
-          @components[name].copy(component)
-        else
-          @components[name] = component.clone()
     return this
+
+  # @return {Entity}
+  clone: ->
+    entity = new Entity(@id, new Vec2(), new Vec2())
+    return entity.copy(this)
+
+  # @return this
   destroy: ->
     @pos = null
     @v = null
-    for name, component of @components
-      component.destroy?()
-    @components = null
-    return this
+    return super()
+
+  # init sprite for this entity using texture
+  # @param texture {PIXI.Texture}
+  # @param PIXI {Module}
+  # @return this
   initSprite: (texture, PIXI) ->
     if @components.sprite
       console.log('Error: Entity already has a sprite.')
+      console.log(this)
       return this
     sprite = new PIXI.Sprite(texture)
     sprite.anchor.set(0.5, 0.5)

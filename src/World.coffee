@@ -1,7 +1,7 @@
 Vec2 = require('./Vec2.coffee')
 Entity = require('./Entity.coffee')
 Bullet = require('./Bullet.coffee')
-BulletPool = require('./BulletPool.coffee')
+BulletPool = require('./Pool.coffee')
 Servant = require('./Servant.coffee')
 Player = require('./Player.coffee')
 
@@ -27,9 +27,11 @@ class World
     @players.push(player)
     @factions.push([])
     return this
+
   addEntity: (faction, entity) ->
     entity.id = @factions[faction].push(entity) - 1
     return this
+
   update: () =>
     @updating = true
     for entities in @factions
@@ -40,7 +42,7 @@ class World
       if player.valid
         for id in [0..@factions.length-1]
           entities = @factions[id]
-          if player.playerID isnt id
+          if player.id isnt id
             for servant in entities
               for bullet in servant.pool.pool
                 if player.testCollision(bullet)

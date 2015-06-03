@@ -2,23 +2,24 @@
 # TODO: use a queue to store the empty slots
 
 Entity = require('./Entity.coffee')
+Container = require('./Container.coffee')
 
-
-class Pool
+class Pool extends Container
   # @param size {int}: the pool size
   # @param entity {Entity*}: the template for entities
-  constructor: (size, entity) ->
+  constructor: (id, size, entity) ->
+    super(id)
     @pool = new Array(size)
     for i in [0..size-1]
       @pool[i] = entity.clone()
       @pool[i].id = i
       @pool[i].valid = false
-    @components = new Object()
     @type = 'Pool'
 
   # This is used when sprites in the pool are the same
   # @param texture {PIXI.Texture}: the texture used to create sprites
   # @param PIXI {optional}: the PIXI module
+  # @return {PIXI.Container}: the sprite pool
   initSprite: (texture, PIXI) ->
     if @components.spritePool?
       console.log('BulletPool has already been initialized.')
@@ -33,11 +34,12 @@ class Pool
   # They will be called by `update(world, parent)` where parent refers
   # to this pool.
   # @param world {World}: handle to the world
-  update: (world) ->
+  # @return this
+  update: (world, parent) ->
     for entity in @pool
       if entity.valid
         entity.update(world, this)
-    for name, component of @components
+    for id, component of @components
       component.update?(world, this)
     return this
 
@@ -45,32 +47,29 @@ class Pool
   # @return entity {Entity}, if entity.valid then no empty slot is found.
   findFirstEmptySlot: ->
     for entity in @pool
-      if not entity.valid then return entity
+      return entity unless entity.valid
     return @pool[0]
 
+  # @return this
   destroy: ->
     @pool = null
-    @components.spritePool?.destroy(true)
-    delete @components.spritePool
-    for name, component of @components
-      component.destroy?()
-    @components = null
+    if @components.spritePool?
+      @components.spritePool.destroy(true)
+      delete @components.spritePool
+    return super()
 
+  # @param rhs {Pool*}
+  # @return this
   copy: (rhs) ->
+    super(rhs)
     for entity in @pool
       entity.copy(rhs.pool[entity.id])
-    for name, component of rhs.components
-      if component.copyable
-        if @component[name]?
-          @component[name].copy(component)
-        else
-          @components[name] = component.clone()
     return this
 
 Pool.create = (rhs, Type) ->
   entity = if Type? then new Type() else new Entity()
   entity.copy(rhs.pool[0])
-  pool = new Pool(rhs.pool.length, entity)
+  pool = new Pool(null, rhs.pool.length, entity)
   return pool.copy(rhs)
 
 module.exports = Pool

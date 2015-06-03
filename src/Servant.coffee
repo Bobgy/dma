@@ -1,7 +1,7 @@
 Vec2 = require('./Vec2.coffee')
 Entity = require('./Entity.coffee')
 Bullet = require('./Bullet.coffee')
-BulletPool = require('./BulletPool.coffee')
+Pool = require('./Pool.coffee')
 Timer = require('./Timer.coffee')
 
 class Servant extends Entity
@@ -9,19 +9,26 @@ class Servant extends Entity
   # @param v {Vec2}
   # @param cd {int}
   # @param face {Vec2}
-  constructor: (pos=new Vec2(), v=new Vec2(), @cd=1000, @face=new Vec2()) ->
-    super(new Vec2(pos.x, pos.y), new Vec2(v.x, v.y))
-    @type = 'Servant'
-    bullet = new Bullet(new Vec2(), new Vec2(), 10)
-    @pool = new BulletPool(8, bullet)
+  constructor: (id, pos=new Vec2(), v=new Vec2(), @cd=1000, @face=new Vec2()) ->
+    super(id, pos, v)
+    bullet = new Bullet(null, new Vec2(), new Vec2(), 10)
+    @pool = new Pool('pool', 8, bullet)
     @components.fireTimer = new Timer('fireTimer', @cd, @fire, true, -60)
+    @type = 'Servant'
 
-  update: (world) ->
+  # @param world {Container*}
+  # @param parent {Container*}
+  # @return this
+  update: (world, parent) ->
     return this unless @valid
-    super(world)
-    @pool.update(world)
+    @pool.update(world, this)
+    super(world, parent)
     return this
 
+  # fire only works as a callback function to timer
+  # @param world {Container*}
+  # @param parent {Container*}
+  # @return this
   fire: (world, parent) ->
     bullet = parent.pool.findFirstEmptySlot()
     if not bullet.valid
@@ -29,9 +36,12 @@ class Servant extends Entity
       bullet.v.copy(parent.face)
       bullet.wake()
     else
-      console.log('BulletPool is full!')
+      console.log('Error: BulletPool is full!')
+      console.log(@pool)
     return this
 
+  # @param rhs {Servant}
+  # @return this
   copy: (rhs) ->
     super(rhs)
     @cd = rhs.cd
@@ -40,13 +50,13 @@ class Servant extends Entity
     @pool.copy(rhs.pool)
     return this
 
+  # @return this
   destroy: ->
     @pool.destroy()
     @pool = null
     @face = null
-    # super()
+    return super()
 
-Servant.create = (rhs) ->
-  (new Servant()).copy(rhs)
+Servant.create = (rhs) -> (new Servant()).copy(rhs)
 
 module.exports = Servant
