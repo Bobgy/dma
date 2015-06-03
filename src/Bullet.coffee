@@ -20,6 +20,14 @@ class Bullet extends Entity
         @pos.x > world.w - @r or
         @pos.y > world.h - @r
       @die()
+    else
+      for player in world.players
+        if  player.valid and
+            player.faction isnt @faction and
+            player.testCollision(this)
+          player.die()
+          @die()
+          break
     return this
 
   # @return {Bullet}

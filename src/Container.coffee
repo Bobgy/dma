@@ -4,6 +4,7 @@ class Container
   constructor: (@id) ->
     @components = new Object()
     # Object.create(null) will make socket.io unable to send this object
+    @cnt = 0
     @type = 'Container'
 
   # update will be called recursively over all components
@@ -23,6 +24,7 @@ class Container
       console.log('Error: copying from rhs which is null or undefined')
       console.log(this)
     @id = rhs.id
+    @cnt = rhs.cnt
     return @copyComponents(rhs)
 
   # deep copy this
@@ -38,6 +40,7 @@ class Container
   # @param rhs {Container*}
   # @return this
   copyComponents: (rhs) ->
+    @cnt = rhs.cnt
     for id, component of rhs.components
       if component.copyable
         if @components[id]?
@@ -53,6 +56,27 @@ class Container
     for id, component of @components
       component.destroy?()
     @components = null
+    return this
+
+  # @param rhs {Object*}
+  # @return this
+  insert: (rhs) ->
+    rhs.id = @cnt++
+    if @components[rhs.id]?
+      console.log('Error: Replacing existing id!')
+      console.log(this)
+      console.log(rhs)
+    @components[rhs.id] = rhs
+    return this
+
+  # @param rhs {Object*}
+  # @return this
+  remove: (rhs) ->
+    if not @components[rhs.id]?
+      console.log('Error: Removing nonexistant id!')
+      console.log(this)
+      console.log(rhs)
+    delete @components[rhs.id]
     return this
 
 module.exports = Container

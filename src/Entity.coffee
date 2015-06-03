@@ -11,6 +11,7 @@ class Entity extends Container
     super(id)
     @valid = true
     @type = 'Entity'
+    @faction = -1 #uninitialized faction
 
   # @param world {Container*}
   # @param parent {Container*}
@@ -27,6 +28,7 @@ class Entity extends Container
     @pos.copy(rhs.pos)
     @v.copy(rhs.v)
     @valid = rhs.valid
+    @faction = rhs.faction
     return this
 
   # @return {Entity}

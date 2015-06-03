@@ -34,6 +34,7 @@ class Servant extends Entity
     if not bullet.valid
       bullet.pos.copy(parent.pos.add(parent.face))
       bullet.v.copy(parent.face)
+      bullet.faction = parent.faction
       bullet.wake()
     else
       console.log('Error: BulletPool is full!')
