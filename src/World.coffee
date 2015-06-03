@@ -6,6 +6,7 @@ Servant = require('./Servant.coffee')
 Player = require('./Player.coffee')
 Container = require('./Container.coffee')
 EventEmitter = require('./EventEmitter.coffee')
+AccurateInterval = require('./AccurateInterval.coffee')
 
 EntityFactory = (type, entity) -> type.create(entity)
 
@@ -96,8 +97,8 @@ class World extends Container
   run: (interval) ->
     @components.eventEmitter.on('key', @keyAction)
     @components.eventEmitter.on('sync', @sync)
-    setInterval(@update, interval)
-    setInterval(@logFPS, 1000)
+    @process = new AccurateInterval(@update, interval)
+    # setInterval(@logFPS, 1000)
 
   clone: -> (new World()).copy(this)
 
