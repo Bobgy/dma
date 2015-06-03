@@ -24,7 +24,7 @@ synchronize = () ->
   pred = game.clone()
   for i in [1..4]
     pred.update()
-  io.emit('sync', pred.players, pred.factions, pred.tick)
+  io.emit('sync', pred.players, pred.factions, pred.tick+1)
 
 setInterval(synchronize, 2000)
 
