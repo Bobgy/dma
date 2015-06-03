@@ -15,8 +15,9 @@ class Entity
     @id = rhs.id
     @valid = rhs.valid
     return @copyComponents(rhs)
-  clone: (rhs) ->
-    new Entity(@pos.clone(), @v.clone())
+  clone: ->
+    entity = new Entity(new Vec2(), new Vec2())
+    return entity.copy(this)
   copyComponents: (rhs) ->
     for name, component of rhs.components
       if component.copyable
@@ -31,6 +32,7 @@ class Entity
     for name, component of @components
       component.destroy?()
     @components = null
+    return this
   initSprite: (texture, PIXI) ->
     if @components.sprite
       console.log('Error: Entity already has a sprite.')
