@@ -16,7 +16,7 @@ id = -1
 socket.on('user_id', (msg) ->
   id = msg
 )
-socket.on('sync', (players, entities) ->
+socket.on('sync', (players, entities, tick) ->
   game.sync(players, entities)
 )
 socket.on('keyDown', (user_id, msg) ->
@@ -37,7 +37,7 @@ downKeyCode = (e) ->
       if not karr[keyCode]
         if id < 2 then game.keyAction(id, true, keyCode)
         karr[keyCode] = true
-        socket.emit('keyDown', keyCode)
+        socket.emit('keyDown', keyCode, game.tick + 1)
 document.onkeydown = downKeyCode
 
 upKeyCode = (e) ->
@@ -47,5 +47,5 @@ upKeyCode = (e) ->
     when 87, 65, 83, 68, 16, 191 # w, a, s, d, shift, /
       if id < 2 then game.keyAction(id, false, keyCode)
       karr[keyCode] = false
-      socket.emit('keyUp', keyCode)
+      socket.emit('keyUp', keyCode, game.tick + 1)
 document.onkeyup = upKeyCode

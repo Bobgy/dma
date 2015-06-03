@@ -3,24 +3,11 @@ module.exports = (grunt) ->
 	grunt.initConfig(
 		pkg:
 			grunt.file.readJSON('package.json')
-		coffee:
-			core:
-				src: 'src/core.coffee'
-				dest: 'js/core.js'
-			server:
-				src: 'server.coffee'
-				dest: 'server.js'
-			client:
-				src: 'src/game.coffee'
-				dest: 'js/game.js'
-			Vec2:
-				src: 'src/Vec2.coffee'
-				dest: 'js/Vec2.js'
 		coffeeify:
 			options:
 				debug: true
 			game:
-				src: 'src/game.coffee'
+				src: 'src/client.coffee'
 				dest: 'js/bundle.js'
 		watch:
 			files: ['src/*.coffee']

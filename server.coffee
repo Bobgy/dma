@@ -18,9 +18,9 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')))
 sockets = []
 keys = [16, 65, 68, 83, 87, 191]
 
-game.run(7)
+game.run(15)
 
-synchronize = () -> io.emit('sync', game.players, game.factions)
+synchronize = () -> io.emit('sync', game.players, game.factions, game.tick)
 setInterval(synchronize, 2000)
 
 user_count = 0
@@ -34,12 +34,12 @@ io.on('connection', (socket) ->
     face = new Vec2(0, if user_id then -1 else 1)
     player = new Player(user_id, pos, new Vec2(), face)
     game.addPlayer(player)
-    socket.on('keyDown', (msg) ->
+    socket.on('keyDown', (msg, tick) ->
       socket.broadcast.emit('keyDown', user_id, msg)
       console.log(user + ' keyDown: ' + msg)
       game.keyAction(user_id, true, msg)
     )
-    socket.on('keyUp', (msg) ->
+    socket.on('keyUp', (msg, tick) ->
       socket.broadcast.emit('keyUp', user_id, msg)
       console.log(user + ' keyUp: ' + msg)
       game.keyAction(user_id, false, msg)

@@ -12,6 +12,6 @@ class AssetsLoader
 	onAssetsLoaded: =>
 		console.log('Assets are loaded.')
 		@game.assets = @loader.resources
-		@game.run(7)
+		@game.run(15)
 
 module.exports = AssetsLoader
