@@ -7,10 +7,13 @@ class AccurateInterval
   gao: =>
     if @valid
       @next += @interval
+      if @next - Date.now() < 0
+        console.log('Error: Framerate is too low, reset!')
+        @reset()
       setTimeout(@gao, @next - Date.now())
       @fn()
 
-  reset: -> @next = Date.now()
+  reset: -> @next = Date.now() + @interval
 
   off: -> @valid = false
 

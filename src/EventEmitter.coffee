@@ -5,8 +5,10 @@ class EventEmitter
   constructor: ->
     @list = []
     @listeners = new Object()
+
+  # @return {int}: the index of pushed event
   pushEvent: (name, tick, args...) ->
-    @list.push(new Event(name, tick, args))
+    return @list.push(new Event(name, tick, args)) - 1
   on: (name, callback) ->
     @listeners[name] = [] unless @listeners[name]?
     @listeners[name].push(callback)
@@ -22,16 +24,33 @@ class EventEmitter
         delList.push(id)
     for id in delList
       @list.splice(delList, 1)
+    return this
+  clearEvent: ->
+    @list = []
+    return this
   destroy: ->
     @list = null
     @listeners = null
-  copy: (rhs) ->
+    return this
+  copy: (rhs, tick=-1) ->
     for event in rhs.list
-      @list.push(event)
-    @listeners = rhs.listeners
+      @list.push(event) if event.tick > tick
+    return this
 
 # Immutable
 class Event
   constructor: (@name, @tick, @args) ->
 
-module.exports = EventEmitter
+class FixedsizeEventEmitter extends EventEmitter
+  constructor: (@maxSize) ->
+    super()
+    @last = -1
+  pushEvent: (name, tick, args...) ->
+    if @list.length == @maxSize
+      @last = if @last + 1 == @maxSize then 0 else @last + 1
+      @list[@last] = new Event(name, tick, args)
+    else
+      @last = super()
+    return @last
+
+module.exports = [EventEmitter, FixedsizeEventEmitter]

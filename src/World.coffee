@@ -5,7 +5,7 @@ Pool = require('./Pool.coffee')
 Servant = require('./Servant.coffee')
 Player = require('./Player.coffee')
 Container = require('./Container.coffee')
-EventEmitter = require('./EventEmitter.coffee')
+[EventEmitter, FixedsizeEventEmitter] = require('./EventEmitter.coffee')
 AccurateInterval = require('./AccurateInterval.coffee')
 
 EntityFactory = (type, entity) -> type.create(entity)
@@ -64,7 +64,7 @@ class World extends Container
       @stage.addChild(newEntity.components.sprite)
     return this
 
-  sync: (players, factions, tick) ->
+  sync: (tick, players, factions, eventEmitter) ->
     @tick = tick
     @players = []
     if @stage?
@@ -78,11 +78,12 @@ class World extends Container
       i++
     for player in players
       @importEntity(@players, player)
+    @components.eventEmitter.clearEvent().copy(eventEmitter) if eventEmitter?
     return this
 
   copy: (rhs) ->
     super(rhs)
-    @sync(rhs.players, rhs.factions, rhs.tick)
+    @sync(rhs.tick, rhs.players, rhs.factions)
     return this
 
   keyAction: (user_id, isDown, keyCode) ->

@@ -1,6 +1,9 @@
 Vec2 = require('./Vec2.coffee')
 World = require('./World.coffee')
 Loader = require('./AssetsLoader.coffee')
+[EventEmitter, FixedsizeEventEmitter] = require('./EventEmitter.coffee')
+
+history = new FixedsizeEventEmitter(16)
 game = new World(PIXI)
 loader = new Loader(game)
 loader.load()
@@ -16,13 +19,20 @@ id = -1
 socket.on('user_id', (msg) ->
   id = msg
 )
-socket.on('sync', (players, entities, tick) ->
+socket.on('sync', (tick, players, factions, eventEmitter) ->
   console.log('sync, server:', tick, 'client:',
               game.tick, 'delta:', tick-game.tick)
-  if Math.abs(tick - game.tick) > 5
-    game.sync(players, entities, tick)
+  oldTick = game.tick
+  game.sync(tick, players, factions, eventEmitter)
+  game.components.eventEmitter.copy(history, tick)
+  if tick > oldTick or tick + 5 < oldTick
+    console.log('Synchronizing...')
+    for i in [1..3]
+      game.update()
   else
-    game.components.eventEmitter.pushEvent('sync', tick, players, entities, tick)
+    while game.tick < oldTick
+      game.update()
+
 )
 socket.on('key', (user_id, msg, isDown, tick) ->
   console.log(user_id, 'key', msg, 'send', tick, ', rec', game.tick)
@@ -37,6 +47,7 @@ downKeyCode = (e) ->
       if not karr[keyCode]
         if id < 2
           game.keyAction(id, true, keyCode)
+          history.pushEvent('key', game.tick + 1, id, true, keyCode)
           socket.emit('key', keyCode, true, game.tick + 1)
         karr[keyCode] = true
 document.onkeydown = downKeyCode
@@ -48,6 +59,7 @@ upKeyCode = (e) ->
     when 87, 65, 83, 68, 16, 191 # w, a, s, d, shift, /
       if id < 2
         game.keyAction(id, false, keyCode)
+        history.pushEvent('key', game.tick + 1, id, false, keyCode)
         socket.emit('key', keyCode, false, game.tick + 1)
       karr[keyCode] = false
 document.onkeyup = upKeyCode

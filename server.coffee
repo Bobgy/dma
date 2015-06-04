@@ -21,10 +21,8 @@ keys = [16, 65, 68, 83, 87, 191]
 game.run(15)
 
 synchronize = () ->
-  pred = game.clone()
-  for i in [1..4]
-    pred.update()
-  io.emit('sync', pred.players, pred.factions, pred.tick+1)
+  io.emit('sync', game.tick, game.players,
+          game.factions, game.components.eventEmitter)
 
 setInterval(synchronize, 2000)
 
