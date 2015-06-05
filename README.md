@@ -31,30 +31,48 @@ The game is designed so that synchronization is easier and allows longer delay:
 
 Here comes the strategy:
 
-Keyboard events are sent from client to server with a timestamp.
-Server sends only your opponent's events to you also with a timestamp.
+Firstly, clients and a server each run a copy of the game. I will describe how information is sent either way.
 
-### Client
+### Client to Server
 
-For clients, your own character, your opponent's servants and bullets are realtime displayed, while your opponent's character, your servants and bullets are displayed delaying for a short period.
+Keyboard events will be sent from clients to server with a timestamp. Usually, the time is definitely in the past, then the server can only roll back, apply the event and then fastfoward to current time. These steps are quite complicated and require additional memory and computation. Luckily, a little trick can avoid rolling back and achieve almost the same performance.
 
-Once a new event is received, the client will:
-- If its timestamp is later than current time, add it to an event queue.
-- Otherwise, simulate only the event to current time and add it.
+That is, clients should be asked to simulate the game a little earlier than the server. Then when server receives a keyboard event from a client, that event should still happen in the "future", and pushed into an event queue to be processed.
 
-The only difference between servant/bullet and opponent's movement is that they use different time. The time used by opponent's movement are delayed by a short period of time so that received events usually has a timestamp later than current time.
+If things do not work out as expected such that an event's timestamp is earlier than the server's time, then the event will be applied right now. The problem is that from now on the client will be deviating from the server. A low-frequency synchronization should ensure clients do not deviate too far. Hopefully, by careful managing the time clients simulate in advance, things like this should rarely happen.
 
-Only simulating new servants/bullets is okay because of orthogonality stated. The delay is tolerable as summoned servants also have a delay to shoot bullets.
+On the other hand, only keyboard events are sent to the server, so the potential of cheating is quite limited.
 
-### Server
+Server sends events caused by your opponents also with a timestamp. There will always be a delay, so your client will extrapolate the information and predict where things will be now.
 
-Server also run a copy of the game to detect whether characters are hitted by a bullet as authorization to prevent cheating. The strategy server uses is similar to clients, but do not delay either side.
+### Server to Client
 
-### Benefit
+Besides sending screenshots at a low frequency to pull back deviating clients, sending events caused by other clients is also a job of the server.
 
-The benefit from this strategy should be clear:
+Now that clients simulate earlier than server, broadcasting keyboard events to other players is not feasible, because clients have to rollback and apply these events which we try to avoid.
 
-- The bullets attacking you and your controls are all realtime.
-- You can watch your opponent dodging bullets smoothly without staggering.
-- Clients cannot cheat.
-- Limited amount of computation needed when you have to rollback and add a new event.
+However, sending back new states of the entities affected by these keyboard events is feasible. Then a client only need to fast forward a single entity to the client's time. The number of entities required to send should be small for this game. Movements will only affect the player and 'Summon' will only affect the summoned servant.
+
+Shadow following should also be applied to your opponent's character to reduce the jitter.
+
+### Pros
+
+- The bullets attacking you and your controls are all real-time.
+- You can watch your opponent dodging bullets smoothly.
+- Cheating potential is limited.
+- Only one copy of the game need to be maintained on either side.
+- Easier to implement (at least for me)
+- Allow loose cohesion between the synchronization module and the game module
+
+### Cons
+
+- Your opponent's behavior is not absolutely accurate. It will be quite usual to see your opponent go through bullets alive.
+- Fast forwarding in clients may be CPU time consuming.
+
+### Update Note
+
+I was planning to let clients display opponents' movement and servants/bullets you send with a delay so that you can see your opponent's movement accurately, but now I give up this idea.
+
+This is because I cannot think of a way to loose the cohesion between synchronization and game logic. I prefer writing game logic without strong cohesion with other modules than displaying oppponents accurately.
+
+By the way, inform me if you have a better idea either on displaying opponents' movement accurately or designing the architecture to loose the cohesion.
