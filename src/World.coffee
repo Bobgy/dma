@@ -39,9 +39,12 @@ class World extends Container
     @components.enemies.insert(entity)
     return this
 
+  earlyUpdate: (otherWorld) ->
+    @tick++
+    return super(this, otherWorld)
+
   # @param otherWorld {World}: the opponent's world
   update: (otherWorld) ->
-    @tick++
     for player in @players
       player.update(this, otherWorld)
     return super(this, otherWorld)
@@ -84,7 +87,6 @@ class World extends Container
       for id, entity of enemies.components
         @importEntity(@components.enemies, entity)
     @components.eventEmitter.clearEvent().copy(eventEmitter) if eventEmitter?
-    @game.tick = @tick
     return this
 
   copy: (obj) ->

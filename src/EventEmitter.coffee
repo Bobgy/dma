@@ -32,8 +32,8 @@ class EventEmitter
     @list = null
     @listeners = null
     return this
-  copy: (rhs, tick=-1) ->
-    for event in rhs.list
+  copy: (obj, tick=-1) ->
+    for event in obj.list
       @list.push(event) if event.tick > tick
     return this
 

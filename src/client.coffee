@@ -18,60 +18,64 @@ loader = new Loader(game, ->
 
   keys = [87, 65, 83, 68, 16, 191]
   keyMovement = keys.slice(0, 5)
+
   karr = []
   for key in keys
     karr[key] = false
 
+  verbose = false
   socket.on('sync', (worldID, tick, players, enemies, eventEmitter) ->
     world = game.worlds[worldID]
-    console.log('sync, server:', tick, 'client:',
-                world.tick, 'delta:', tick-world.tick)
     oldTick = world.tick
+
+    # Verbose
+    if verbose and world.id is id
+      oldPos = world.players[0].pos.clone() if world.players[0]?
+    # End
+
     world.sync(tick, players, enemies, eventEmitter)
-    world.components.eventEmitter.copy(history, tick) if world.id is worldID
-    if tick > oldTick or tick + 5 < oldTick
-      console.log('Synchronizing...')
-      for i in [1..3]
-        world.update(game.worlds[worldID^1])
-    else
-      while world.tick < oldTick
-        world.update(game.worlds[worldID^1])
+    if world.id is id
+      console.log('sync, server:', tick, 'client:',
+                  oldTick, 'delta:', oldTick-tick)
+      world.components.eventEmitter.copy(history, tick)
+      if tick+1 < oldTick < tick+10
+        while world.tick < oldTick
+          world.earlyUpdate(game.worlds[worldID^1])
+          world.update(game.worlds[worldID^1])
+      else
+        console.log('Synchronizing...')
+        for i in [1..8]
+          world.earlyUpdate(game.worlds[worldID^1])
+          world.update(game.worlds[worldID^1])
+
+      # Verbose
+      if oldPos?
+        newPos = world.players[0].pos.clone()
+        console.log(newPos.sub(oldPos))
+      # End
   )
   socket.on('key', (user_id, msg, isDown, tick) ->
-    console.log(user_id, 'key', msg, 'send', tick, ', rec', game.tick)
-    if not (user_id == id)
-      game.worlds[user_id].components.eventEmitter.
-           pushEvent('key', tick, 0, isDown, msg)
+    console.log(user_id, 'key', msg, 'send', tick, ', rec', game.worlds[user_id].tick)
+    game.worlds[user_id].components.eventEmitter.
+         pushEvent('key', tick, 0, isDown, msg)
   )
   socket.on('Servant', (tick, worldID, servant) ->
     game.worlds[worldID].components.eventEmitter.
          pushEvent('Servant', tick, tick, servant)
   )
 
-  downKeyCode = (e) ->
-    evt = e || window.event
-    keyCode = evt.KeyCode || evt.which || evt.charCode
-    switch keyCode
-      when 87, 65, 83, 68, 16, 191 # w, a, s, d, shift, /
-        if not karr[keyCode]
-          if id < 2
-            game.worlds[id].keyAction(0, true, keyCode)
-            history.pushEvent('key', game.tick + 1, id, true, keyCode)
-            socket.emit('key', keyCode, true, game.tick + 1)
-          karr[keyCode] = true
-  document.onkeydown = downKeyCode
-
-  upKeyCode = (e) ->
+  onKey = (isDown, e) ->
     evt = e || window.event
     keyCode = evt.KeyCode || evt.which || evt.charCode
     switch keyCode
       when 87, 65, 83, 68, 16, 191 # w, a, s, d, shift, /
         if id < 2
-          game.worlds[id].keyAction(0, false, keyCode)
-          history.pushEvent('key', game.tick + 1, id, false, keyCode)
-          socket.emit('key', keyCode, false, game.tick + 1)
-        karr[keyCode] = false
-  document.onkeyup = upKeyCode
+          world = game.worlds[id]
+          if world.keyAction(0, isDown, keyCode)
+            history.pushEvent('key', world.tick + 1, 0, isDown, keyCode)
+            socket.emit('key', keyCode, isDown, world.tick + 1)
+  document.onkeydown = onKey.bind(null, true)
+  document.onkeyup = onKey.bind(null, false)
 
   @game.start(15, false)
 )

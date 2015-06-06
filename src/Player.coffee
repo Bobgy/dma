@@ -5,8 +5,8 @@ SkillSummonServant = require('./scripts/skills/SummonServant.coffee')
 
 # a basic player
 class Player extends Entity
-  short_step: 1.5
-  long_step: 3
+  short_step: 3
+  long_step: 6
   #     Shift,  A,  D,  S,  W,   /
   keys: [  16, 65, 68, 83, 87, 191]
   r: 5 # the collision radius

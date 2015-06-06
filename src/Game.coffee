@@ -16,7 +16,6 @@ class Game extends Container
     if @PIXI
       @renderer = @PIXI.autoDetectRenderer(@w, @h, {backgroundColor : 0x66ccff})
 
-    @tick = 0
     # for FPS analysis
     @lastTime = Date.now()
     @lastTick = 0
@@ -28,7 +27,6 @@ class Game extends Container
     SkillSummonServant.init(@worlds[i]) for i in [0..1]
 
   update: =>
-    @tick++
     @worlds[i].earlyUpdate(@worlds[i], @worlds[i^1]) for i in [0..1]
     @worlds[i].update(@worlds[i^1]) for i in [0..1]
     requestAnimationFrame(@animate) if @PIXI?
