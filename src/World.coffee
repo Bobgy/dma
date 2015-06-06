@@ -42,15 +42,14 @@ class World extends Container
     @components.enemies.insert(entity)
     return this
 
-  earlyUpdate: (otherWorld) ->
+  earlyUpdate: ->
     @tick++
-    return super(this, otherWorld)
+    return super(this)
 
-  # @param otherWorld {World}: the opponent's world
-  update: (otherWorld) ->
+  update: ->
     for player in @players
-      player.update(this, otherWorld)
-    return super(this, otherWorld)
+      player.update(this, this)
+    return super(this, this)
 
   # @param container {Array/Container*}
   # @param entity {Entity*}
@@ -63,7 +62,10 @@ class World extends Container
     PIXI = @game.PIXI
     if PIXI?
       if entity.type is 'Servant'
-        spritePool = newEntity.pool.initSprite(@game.assets['Bullet'].texture, PIXI)
+        spritePool = newEntity.components.bulletEmitter.
+                               components.pool.initSprite(
+          @game.assets['Bullet'].texture, PIXI
+        )
         @stage.addChild(spritePool)
       texture = @game.assets[entity.type].texture
       newEntity.initSprite(texture, PIXI)

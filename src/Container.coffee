@@ -10,33 +10,29 @@ class Container
   # init will be called only once when the world initializes
   # @param world {Container*}: the root container
   # @param parent {Container*}: the parent container
-  # @return this
-  init: (world, otherWorld, parent) ->
+  init: (world, parent) ->
     for id, component of @components
-      component.init?(world, otherWorld, parent)
+      component.init?(world, parent)
     return this
 
   # earlyUpdate will be called recursively over all components
   # @param world {Container*}: the root container
   # @param parent {Container*}: the parent container
-  # @return this
-  earlyUpdate: (world, otherWorld, parent) ->
+  earlyUpdate: (world, parent) ->
     for id, component of @components
-      component.earlyUpdate?(world, otherWorld, this)
+      component.earlyUpdate?(world, this)
     return this
 
   # update will be called recursively over all components
   # @param world {Container*}: the root container
   # @param parent {Container*}: the parent container
-  # @return this
-  update: (world, otherWorld, parent) ->
+  update: (world, parent) ->
     for id, component of @components
-      component.update?(world, otherWorld, this)
+      component.update?(world, this)
     return this
 
   # copy from obj
   # @param obj {Container*}
-  # @return this
   copy: (obj) ->
     if not obj?
       console.log('Error: copying from obj which is null or undefined')
@@ -56,7 +52,6 @@ class Container
   # existing component will be copied by the copy(obj) function
   # nonexisting component will be cloned
   # @param obj {Container*}
-  # @return this
   copyComponents: (obj) ->
     @cnt = obj.cnt
     for id, component of obj.components
@@ -69,15 +64,19 @@ class Container
 
   # destroys this container and its components
   # only Objects need to be destroyed
-  # @return this
-  destroy: ->
+  # @param world {World}
+  # @param parent {Container*}
+  destroy: (world, parent) ->
     for id, component of @components
-      component.destroy?()
+      component.destroy?(world, this)
     @components = null
+    if parent?
+      parent.remove(@id)
+    else
+      console.log('parent:', parent)
     return this
 
   # @param obj {Object*}
-  # @return this
   insert: (obj) ->
     obj.id = @cnt++ unless obj.id?
     if @components[obj.id]?
@@ -88,13 +87,11 @@ class Container
     return this
 
   # @param obj {Object*}
-  # @return this
-  remove: (obj) ->
-    if not @components[obj.id]?
-      console.log('Error: Removing nonexistant id!')
+  remove: (id) ->
+    if not @components[id]?
+      console.log("Error: Removing nonexistant id: #{id}!")
       console.log(this)
-      console.log(obj)
-    delete @components[obj.id]
+    delete @components[id]
     return this
 
 module.exports = Container

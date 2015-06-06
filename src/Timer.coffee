@@ -24,7 +24,7 @@ class Timer extends Ticker
                 @periodic=true, currentTick=0) ->
     super(@id, currentTick)
     @copyable = true
-  update: (world, otherWorld, parent) ->
+  update: (world, parent) ->
     return this unless @valid
     super()
     if @tick == @interval

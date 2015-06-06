@@ -11,17 +11,17 @@ class Skill
   constructor: (@id, @coolDown=120, @manaCost=240, @currentTick=0) ->
     @copyable = true
 
-  update: (world, otherWorld, parent) ->
+  update: (world, parent) ->
     @currentTick-- if @currentTick
     if @currentTick is 0 and
         parent.mana >= @manaCost and
         parent.keyState[191] #key: '/'
       @currentTick = @coolDown
       parent.mana -= @manaCost
-      @cast(world, otherWorld, parent)
+      @cast(world, parent)
     return this
 
-  cast: (world, otherWorld, parent) ->
+  cast: (world, parent) ->
     # do nothing, overide this function to add a new skill
     return this
 

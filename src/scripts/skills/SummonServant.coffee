@@ -6,30 +6,31 @@ class SkillSummonServant extends Skill
   constructor: (@id, @coolDown=120, @manaCost=240, @currentTick=0) ->
     @copyable = false
 
-  cast: (world, otherWorld, parent) ->
+  cast: (world, parent) ->
     servant = new Servant(null, parent.pos.clone(),
-                          new Vec2(), 120, parent.face)
-    otherWorld.components.eventEmitter.pushEvent(
+                          new Vec2(), parent.face)
+    world.game.getWorld(world.id^1).components.eventEmitter.pushEvent(
       'Servant', world.tick + 1, world.tick + 1, servant
     )
     if world.game.io? # TODO change to serverOnly
-      world.game.io.emit('Servant', world.tick + 1, otherWorld.id, servant)
+      world.game.io.emit('Servant', world.tick + 1, world.id^1, servant)
 
-SkillSummonServant.init = (world, otherWorld, parent) ->
+SkillSummonServant.init = (world, parent) ->
   world.components.eventEmitter.on('Servant', (tick, servantPrototype) ->
     servant = (new Servant()).copy(servantPrototype)
     @addEntity(servant)
-    game = world.game
-    if game.PIXI?
-      servant.initSprite(world.game.assets['Servant'].texture, game.PIXI)
-      world.stage.addChild(servant.components.sprite)
-      spritePool = servant.pool.
-        initSprite(world.game.assets['Bullet'].texture, game.PIXI)
-      world.stage.addChild(spritePool)
-    while tick < world.tick
+    console.log("New servant:", servant.type)
+    PIXI = @game.PIXI
+    if PIXI?
+      servant.initSprite(@game.assets['Servant'].texture, PIXI)
+      @stage.addChild(servant.components.sprite)
+      spritePool = servant.components.bulletEmitter.components.pool.
+        initSprite(@game.assets['Bullet'].texture, PIXI)
+      @stage.addChild(spritePool)
+    while tick < @tick
       tick++
-      servant.earlyUpdate(this)
-      servant.update(this)
+      servant.earlyUpdate(this, @components.enemies)
+      servant.update(this, @components.enemies)
   )
   return this
 

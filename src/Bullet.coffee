@@ -10,10 +10,9 @@ class Bullet extends Entity
     super(id, pos, v)
     @type = 'Bullet'
 
-  # @return this
-  update: (world, otherWorld, parent) ->
+  update: (world, parent) ->
     return this unless @valid
-    super(world, otherWorld, parent)
+    super(world, parent)
     # remove when out of screen
     if  @pos.x < @r or
         @pos.y < @r or
@@ -36,20 +35,17 @@ class Bullet extends Entity
     bullet.id = @id
     return bullet.copyComponents(this)
 
-  # @return this
   die: ->
     @valid = false
     @components.sprite?.visible = false
     return this
 
-  # @return this
   wake: ->
     @valid = true
     @components.sprite?.visible = true
     return this
 
   # @param rhs {Bullet}
-  # @return this
   copyStatus: (rhs) ->
     @valid = rhs.valid
     @pos.copy(rhs.pos)
@@ -57,7 +53,6 @@ class Bullet extends Entity
     return this
 
   # @param rhs {Bullet}
-  # @return this
   copy: (rhs) ->
     super(rhs)
     @r = rhs.r

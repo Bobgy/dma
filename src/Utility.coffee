@@ -19,4 +19,9 @@ class FPSLogger
       console.log(@id, 'FPS:', @FPS) if @verbose
       @lastLog = Date.now()
 
-module.exports = {FPSLogger}
+destroyDisplayObject = (obj) ->
+  if obj.parent?
+    obj.parent.removeChild(obj)
+  obj.destroy()
+
+module.exports = {FPSLogger, destroyDisplayObject}

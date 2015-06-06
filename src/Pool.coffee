@@ -3,6 +3,7 @@
 
 Entity = require('./Entity.coffee')
 Container = require('./Container.coffee')
+Utility = require('./Utility.coffee')
 
 class Pool extends Container
   # @param size {int}: the pool size
@@ -14,6 +15,7 @@ class Pool extends Container
       @pool[i] = entity.clone()
       @pool[i].id = i
       @pool[i].valid = false
+    @copyable = true
     @type = 'Pool'
 
   # This is used when sprites in the pool are the same
@@ -34,12 +36,12 @@ class Pool extends Container
   # They will be called by `update(world, parent)` where parent refers
   # to this pool.
   # @param world {World}: handle to the world
-  # @return this
-  update: (world, otherWorld, parent) ->
+
+  update: (world, parent) ->
     for entity in @pool
       if entity.valid
-        entity.update(world, otherWorld, this)
-    super(world, otherWorld, parent)
+        entity.update(world, this)
+    super(world, parent)
     return this
 
   # Find the first empty slot (with an invalid entity) in the pool
@@ -49,27 +51,25 @@ class Pool extends Container
       return entity unless entity.valid
     return @pool[0]
 
-  # @return this
-  destroy: (world) ->
+  destroy: (world, parent) ->
     @pool = null
     if @components.spritePool?
-      world.stage.removeChild(@components.spritePool)
-      @components.spritePool.destroy(true)
+      Utility.destroyDisplayObject(@components.spritePool)
       delete @components.spritePool
-    return super()
+    return super(world, parent)
 
-  # @param rhs {Pool*}
-  # @return this
-  copy: (rhs) ->
-    super(rhs)
+  # @param obj {Pool*}
+
+  copy: (obj) ->
+    super(obj)
     for entity in @pool
-      entity.copy(rhs.pool[entity.id])
+      entity.copy(obj.pool[entity.id])
     return this
 
-Pool.create = (rhs, Type) ->
+Pool.create = (obj, Type) ->
   entity = if Type? then new Type() else new Entity()
-  entity.copy(rhs.pool[0])
-  pool = new Pool(null, rhs.pool.length, entity)
-  return pool.copy(rhs)
+  entity.copy(obj.pool[0])
+  pool = new Pool(null, obj.pool.length, entity)
+  return pool.copy(obj)
 
 module.exports = Pool

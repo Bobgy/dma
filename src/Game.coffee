@@ -13,8 +13,9 @@ class Game extends Container
               new World(1, @w, @h, @PIXI)]
     for world in @worlds
       world.game = this
-    if @PIXI
+    if @PIXI?
       @renderer = @PIXI.autoDetectRenderer(@w, @h, {backgroundColor : 0x66ccff})
+      @stage = new @PIXI.Container()
 
     # stores socket.io handle, should be added later
     @io = null
@@ -28,17 +29,24 @@ class Game extends Container
     requestAnimationFrame(@animate) if @PIXI?
 
   animate: =>
-    stage = new @PIXI.Container()
-    stage.addChild(@worlds[i].stage) for i in [0..1]
+    @stage.removeChildren()
+    @stage.addChild(@worlds[i].stage) for i in [0..1]
     for i in [0..1]
       for player in @worlds[i].players
-          stage.addChild(player.components.sprite) if player.components.sprite?
-    @renderer.render(stage)
+        @stage.addChild(player.components.sprite) if player.components.sprite?
+    @renderer.render(@stage)
+
+  # get a world with its id
+  # @param id {integer}
+  getWorld: (id) ->
+    if id in [0, 1]
+      return @worlds[id]
+    console.log('Error: get Invalid World with id:', id)
+    return null
 
   # @param interval {float}: the frame interval you intend the game to run with
   # @param isFPSon {boolean}: whether logging current FPS in game
-  start: (interval=15, isFPSon=false) ->
+  start: (interval=15) ->
     @process = new AccurateInterval(@update, interval)
-    setInterval(@logFPS, 1000) if isFPSon
 
 module.exports = Game

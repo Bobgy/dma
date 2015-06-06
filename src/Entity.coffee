@@ -15,22 +15,22 @@ class Entity extends Container
 
   # @param world {Container*}
   # @param parent {Container*}
-  # @return this
-  update: (world, otherWorld, parent) ->
+
+  update: (world, parent) ->
     return this unless @valid
     @pos.set(@pos.x + @v.x, @pos.y + @v.y)
     if @components.sprite?
       @components.sprite.position.set(@pos.x, @pos.y)
-    return super(world, otherWorld, parent)
+    return super(world, parent)
 
-  # @param rhs {Entity*}
-  # @return this
-  copy: (rhs) ->
-    super(rhs)
-    @pos.copy(rhs.pos)
-    @v.copy(rhs.v)
-    @valid = rhs.valid
-    @faction = rhs.faction
+  # @param obj {Entity*}
+
+  copy: (obj) ->
+    super(obj)
+    @pos.copy(obj.pos)
+    @v.copy(obj.v)
+    @valid = obj.valid
+    @faction = obj.faction
     return this
 
   # @return {Entity}
@@ -38,18 +38,18 @@ class Entity extends Container
     entity = new Entity(@id, new Vec2(), new Vec2())
     return entity.copy(this)
 
-  # @return this
-  destroy: ->
+
+  destroy: (world, parent) ->
     @pos = null
     @v = null
-    return super()
+    return super(world, parent)
 
   # init sprite for this entity using texture
   # @param texture {PIXI.Texture}
   # @param PIXI {Module}
-  # @return this
+
   initSprite: (texture, PIXI) ->
-    if @components.sprite
+    if @components.sprite?
       console.log('Error: Entity already has a sprite.')
       console.log(this)
       return this

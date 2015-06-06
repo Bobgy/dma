@@ -1,8 +1,7 @@
 Vec2 = require('./Vec2.coffee')
 Entity = require('./Entity.coffee')
-Bullet = require('./Bullet.coffee')
-Pool = require('./Pool.coffee')
-Timer = require('./Timer.coffee')
+Utility = require('./Utility.coffee')
+BulletEmitter = require('./BulletEmitter.coffee')
 
 class Servant extends Entity
   # @param pos {Vec2}
@@ -10,60 +9,37 @@ class Servant extends Entity
   # @param cd {int}
   # @param face {Vec2}
   # @param timeToLive {int(tick)}
-  constructor: (id, pos=new Vec2(), v=new Vec2(), @cd=1000,
+  constructor: (id, pos=new Vec2(), v=new Vec2(),
                 @face=new Vec2(), @timeToLive = 666) ->
     super(id, pos, v)
-    bullet = new Bullet(null, new Vec2(), new Vec2(), 10)
-    @pool = new Pool('pool', 8, bullet)
-    @components.fireTimer = new Timer('fireTimer', @cd, @fire, true, -60)
+    @insert(new BulletEmitter('bulletEmitter', @pos, null, null, @face.clone()))
     @type = 'Servant'
 
   # @param world {Container*}
   # @param parent {Container*}
-  # @return this
-  update: (world, otherWorld, parent) ->
+  update: (world, parent) ->
     return this unless @valid
-    @pool.update(world, otherWorld, this)
-    super(world, otherWorld, parent)
+    super(world, parent)
     @timeToLive--
-    @destroy(world) if @timeToLive <= 0
+    @destroy(world, world.components.enemies) if @timeToLive <= 0
     return this
 
-  # fire only works as a callback function to timer
-  # @param world {Container*}
-  # @param parent {Container*}
-  # @return this
-  fire: (world, parent) ->
-    bullet = parent.pool.findFirstEmptySlot()
-    if not bullet.valid
-      bullet.pos.copy(parent.pos.add(parent.face))
-      bullet.v.copy(parent.face)
-      bullet.faction = parent.faction
-      bullet.wake()
-    else
-      console.log('Error: BulletPool is full!')
-      console.log(@pool)
+  # @param obj {Servant}
+  copy: (obj) ->
+    super(obj)
+    @face.copy(obj.face)
+    @timeToLive = obj.timeToLive
     return this
 
-  # @param rhs {Servant}
-  # @return this
-  copy: (rhs) ->
-    super(rhs)
-    @cd = rhs.cd
-    @face.copy(rhs.face)
-    @timer = rhs.timer
-    @pool.copy(rhs.pool)
-    return this
-
-  destroy: (world) ->
-    @pool.destroy(world)
-    @pool = null
+  # @param world {World}
+  destroy: (world, parent) ->
     @face = null
-    world.stage.removeChild(@components.sprite) if @components.sprite?
-    world.components.enemies.remove(this)
-    super()
+    if @components.sprite?
+      Utility.destroyDisplayObject(@components.sprite)
+      delete @components.sprite
+    super(world, parent)
     return this
 
-Servant.create = (rhs) -> (new Servant()).copy(rhs)
+Servant.create = (obj) -> (new Servant()).copy(obj)
 
 module.exports = Servant

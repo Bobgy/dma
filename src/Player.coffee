@@ -26,21 +26,21 @@ class Player extends Entity
 
   # @param world {Container*}
   # @param parent {Container*}
-  # @return this
-  update: (world, otherWorld, parent) ->
+
+  update: (world, parent) ->
     return this unless @valid
     @mana = Math.min(@mana + 1, @maxMana)
     step = if @keyState[16] then @short_step else @long_step
     @v.x = (@keyState[68] - @keyState[65]) * step
     @v.y = (@keyState[83] - @keyState[87]) * step
-    super(world, otherWorld, parent)
+    super(world, parent)
     @pos.x = Math.max(20, @pos.x)
     @pos.y = Math.max(20, @pos.y)
     @pos.x = Math.min(world.w-20, @pos.x)
     @pos.y = Math.min(world.h-20, @pos.y)
     return this
 
-  # @return this
+
   die: ->
     console.log('Player ', @id, 'died!')
     @valid = false
@@ -48,7 +48,6 @@ class Player extends Entity
     return this
 
   # @param rhs {Player}
-  # @return this
   copy: (rhs) ->
     super(rhs)
     @keyState = rhs.keyState
@@ -56,14 +55,13 @@ class Player extends Entity
     @mana = rhs.mana
     return this
 
-  # @return this
-  destroy: ->
+  destroy: (world, parent) ->
     @face = null
     @keyState.splice(0, keyState.length)
     @keyState = null
-    return super()
+    return super(world, parent)
 
-  # @return this
+
   # @param rhs {bullet}
   # @return {bool}
   testCollision: (rhs) ->
