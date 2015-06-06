@@ -16,10 +16,6 @@ class Game extends Container
     if @PIXI
       @renderer = @PIXI.autoDetectRenderer(@w, @h, {backgroundColor : 0x66ccff})
 
-    # for FPS analysis
-    @lastTime = Date.now()
-    @lastTick = 0
-
     # stores socket.io handle, should be added later
     @io = null
 
@@ -38,12 +34,6 @@ class Game extends Container
       for player in @worlds[i].players
           stage.addChild(player.components.sprite) if player.components.sprite?
     @renderer.render(stage)
-
-  logFPS: =>
-    FPS = (@tick - @lastTick)/(Date.now() - @lastTime)*1000
-    @lastTick = @tick
-    @lastTime = Date.now()
-    console.log('FPS:', FPS)
 
   # @param interval {float}: the frame interval you intend the game to run with
   # @param isFPSon {boolean}: whether logging current FPS in game

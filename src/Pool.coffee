@@ -50,9 +50,10 @@ class Pool extends Container
     return @pool[0]
 
   # @return this
-  destroy: ->
+  destroy: (world) ->
     @pool = null
     if @components.spritePool?
+      world.stage.removeChild(@components.spritePool)
       @components.spritePool.destroy(true)
       delete @components.spritePool
     return super()

@@ -5,6 +5,8 @@ Pool = require('./Pool.coffee')
 Servant = require('./Servant.coffee')
 Player = require('./Player.coffee')
 Container = require('./Container.coffee')
+Utility = require('./Utility.coffee')
+
 [EventEmitter, FixedsizeEventEmitter] = require('./EventEmitter.coffee')
 
 EntityFactory = (type, entity) -> type.create(entity)
@@ -13,15 +15,16 @@ class World extends Container
   # @param id {string*}
   # @param w, h {integer}: width and height of the stage
   # @param PIXI {module, optional}: passed to init graphics
+  verbose: false
   constructor: (id='world', @w=1024, @h=720, @PIXI) ->
     super(id)
 
     @players = []
     @insert(new Container('enemies'))
+    @insert(new Utility.FPSLogger(@verbose, 'Logger_' + id)) if @verbose
     @insert(new EventEmitter('eventEmitter'))
     @components.eventEmitter.on('key', @keyAction)
     @components.eventEmitter.on('sync', @sync)
-
     @tick = 0
 
     @stage = new @PIXI.Container() if @PIXI?

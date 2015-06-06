@@ -9,7 +9,9 @@ class Servant extends Entity
   # @param v {Vec2}
   # @param cd {int}
   # @param face {Vec2}
-  constructor: (id, pos=new Vec2(), v=new Vec2(), @cd=1000, @face=new Vec2()) ->
+  # @param timeToLive {int(tick)}
+  constructor: (id, pos=new Vec2(), v=new Vec2(), @cd=1000,
+                @face=new Vec2(), @timeToLive = 666) ->
     super(id, pos, v)
     bullet = new Bullet(null, new Vec2(), new Vec2(), 10)
     @pool = new Pool('pool', 8, bullet)
@@ -23,6 +25,8 @@ class Servant extends Entity
     return this unless @valid
     @pool.update(world, otherWorld, this)
     super(world, otherWorld, parent)
+    @timeToLive--
+    @destroy(world) if @timeToLive <= 0
     return this
 
   # fire only works as a callback function to timer
@@ -51,12 +55,14 @@ class Servant extends Entity
     @pool.copy(rhs.pool)
     return this
 
-  # @return this
-  destroy: ->
-    @pool.destroy()
+  destroy: (world) ->
+    @pool.destroy(world)
     @pool = null
     @face = null
-    return super()
+    world.stage.removeChild(@components.sprite) if @components.sprite?
+    world.components.enemies.remove(this)
+    super()
+    return this
 
 Servant.create = (rhs) -> (new Servant()).copy(rhs)
 
