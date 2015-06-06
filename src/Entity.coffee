@@ -7,19 +7,21 @@ class Entity extends Container
   # @param id {string}
   # @param pos {Vec2}: position
   # @param v {Vec2}: velocity
-  constructor: (id, @pos, @v) ->
+  # @param faction {integer}
+  constructor: (id, @pos, @v, @faction=-1) ->
     super(id)
     @valid = true
     @type = 'Entity'
-    @faction = -1 #uninitialized faction
 
   # @param world {Container*}
   # @param parent {Container*}
   # @return this
-  update: (world, parent) ->
+  update: (world, otherWorld, parent) ->
     return this unless @valid
     @pos.set(@pos.x + @v.x, @pos.y + @v.y)
-    return super(world, parent)
+    if @components.sprite?
+      @components.sprite.position.set(@pos.x, @pos.y)
+    return super(world, otherWorld, parent)
 
   # @param rhs {Entity*}
   # @return this

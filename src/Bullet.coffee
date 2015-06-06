@@ -11,9 +11,9 @@ class Bullet extends Entity
     @type = 'Bullet'
 
   # @return this
-  update: (world, parent) ->
+  update: (world, otherWorld, parent) ->
     return this unless @valid
-    super(world, parent)
+    super(world, otherWorld, parent)
     # remove when out of screen
     if  @pos.x < @r or
         @pos.y < @r or

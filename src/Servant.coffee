@@ -19,10 +19,10 @@ class Servant extends Entity
   # @param world {Container*}
   # @param parent {Container*}
   # @return this
-  update: (world, parent) ->
+  update: (world, otherWorld, parent) ->
     return this unless @valid
-    @pool.update(world, this)
-    super(world, parent)
+    @pool.update(world, otherWorld, this)
+    super(world, otherWorld, parent)
     return this
 
   # fire only works as a callback function to timer

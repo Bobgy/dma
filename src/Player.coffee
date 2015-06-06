@@ -23,18 +23,17 @@ class Player extends Entity
     for key in @keys
       @keyState[key] = false
     @mana = 0
-    @components.skill = new SkillSummonServant('skill')
 
   # @param world {Container*}
   # @param parent {Container*}
   # @return this
-  update: (world, parent) ->
+  update: (world, otherWorld, parent) ->
     return this unless @valid
     @mana = Math.min(@mana + 1, @maxMana)
     step = if @keyState[16] then @short_step else @long_step
     @v.x = (@keyState[68] - @keyState[65]) * step
     @v.y = (@keyState[83] - @keyState[87]) * step
-    super(world, parent)
+    super(world, otherWorld, parent)
     @pos.x = Math.max(20, @pos.x)
     @pos.y = Math.max(20, @pos.y)
     @pos.x = Math.min(world.w-20, @pos.x)

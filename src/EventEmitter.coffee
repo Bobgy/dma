@@ -2,7 +2,7 @@
 # Events should have (name, tick, args...)
 class EventEmitter
   copyable: true
-  constructor: ->
+  constructor: (@id) ->
     @list = []
     @listeners = new Object()
 

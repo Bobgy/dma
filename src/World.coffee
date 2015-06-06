@@ -6,100 +6,98 @@ Servant = require('./Servant.coffee')
 Player = require('./Player.coffee')
 Container = require('./Container.coffee')
 [EventEmitter, FixedsizeEventEmitter] = require('./EventEmitter.coffee')
-AccurateInterval = require('./AccurateInterval.coffee')
 
 EntityFactory = (type, entity) -> type.create(entity)
 
 class World extends Container
-  w: 1024
-  h: 720
-  constructor: (@PIXI, id='world') ->
+  # @param id {string*}
+  # @param w, h {integer}: width and height of the stage
+  # @param PIXI {module, optional}: passed to init graphics
+  constructor: (id='world', @w=1024, @h=720, @PIXI) ->
     super(id)
-    @tick = 0
+
     @players = []
-    @factions = [new Container(0), new Container(1)]
-    @components.eventEmitter = new EventEmitter()
-    if @PIXI?
-      @renderer = @PIXI.autoDetectRenderer(@w, @h,
-              {backgroundColor : 0x66ccff})
-      # create the root of the scene graph
-      @stage = new @PIXI.Container()
-      @animate = => @renderer.render(@stage)
-    @lastTime = Date.now()
-    @lastTick = @tick
+    @insert(new Container('enemies'))
+    @insert(new EventEmitter('eventEmitter'))
+    @components.eventEmitter.on('key', @keyAction)
+    @components.eventEmitter.on('sync', @sync)
 
+    @tick = 0
+
+    @stage = new @PIXI.Container() if @PIXI?
+    @game = null
+    @process = null
+
+  # @param player {Player}
   addPlayer: (player) ->
-    len = @players.push(player)
-    player.id = player.faction = len - 1
+    player.id = @players.push(player) - 1
+    player.faction = 0
     return this
 
-  addEntity: (faction, entity) ->
-    @factions[faction].insert(entity)
-    entity.faction = faction
+  # @param entity {Entity*}: require entity.faction being valid
+  addEntity: (entity) ->
+    @components.enemies.insert(entity)
     return this
 
-  update: =>
+  # @param otherWorld {World}: the opponent's world
+  update: (otherWorld) ->
     @tick++
-    @earlyUpdate(this)
     for player in @players
-      player.update(this)
-    for entities in @factions
-      entities.update(this)
-    super(this)
-    if @PIXI? then requestAnimationFrame(@animate)
-    return this
+      player.update(this, otherWorld)
+    return super(this, otherWorld)
 
+  # @param container {Array/Container*}
+  # @param entity {Entity*}
   importEntity: (container, entity) ->
     newEntity = EntityFactory(eval(entity.type), entity)
     if container.type?
       container.insert(newEntity)
     else
       container.push(newEntity)
+    PIXI = @game.PIXI
     if PIXI?
       if entity.type is 'Servant'
-        spritePool = newEntity.pool.initSprite(@assets['Bullet'].texture, PIXI)
+        spritePool = newEntity.pool.initSprite(@game.assets['Bullet'].texture, PIXI)
         @stage.addChild(spritePool)
-      texture = @assets[entity.type].texture
+      texture = @game.assets[entity.type].texture
       newEntity.initSprite(texture, PIXI)
-      @stage.addChild(newEntity.components.sprite)
+      if entity.type isnt 'Player'
+        @stage.addChild(newEntity.components.sprite)
     return this
 
-  sync: (tick, players, factions, eventEmitter) ->
+  # synchronize the game with given arguments
+  # @param tick {integer}
+  # @param players {Array of Players}
+  # @param enemies {Container*}
+  # @param eventEmitter {EventEmitter}
+  sync: (tick, players, enemies, eventEmitter) ->
     @tick = tick
     @players = []
-    if @stage?
-      for sprite in @stage.removeChildren()
-        sprite.destroy()
-    @factions = [new Container(0), new Container(1)]
-    i = 0
-    for faction in factions
-      for id, entity of faction.components
-        @importEntity(@factions[i], entity)
-      i++
     for player in players
       @importEntity(@players, player)
+    if enemies?
+      @components.enemies = new Container('enemies')
+      if @stage?
+        for sprite in @stage.removeChildren()
+          sprite.destroy()
+      for id, entity of enemies.components
+        @importEntity(@components.enemies, entity)
     @components.eventEmitter.clearEvent().copy(eventEmitter) if eventEmitter?
     return this
 
-  copy: (rhs) ->
-    super(rhs)
-    @sync(rhs.tick, rhs.players, rhs.factions)
+  copy: (obj) ->
+    super(obj)
+    @sync(obj.tick, obj.players)
     return this
 
-  keyAction: (user_id, isDown, keyCode) ->
-    @players[user_id].keyState[keyCode] = isDown
-
-  logFPS: =>
-    FPS = (@tick - @lastTick)/(Date.now() - @lastTime)*1000
-    @lastTick = @tick
-    @lastTime = Date.now()
-    console.log('FPS:', FPS)
-
-  run: (interval) ->
-    @components.eventEmitter.on('key', @keyAction)
-    @components.eventEmitter.on('sync', @sync)
-    @process = new AccurateInterval(@update, interval)
-    # setInterval(@logFPS, 1000)
+  # @param userID {integer}
+  # @param isDown {boolean}
+  # @param keyCode {integer}
+  # @return {boolean}: whether the keyAction changed keyState
+  keyAction: (userID, isDown, keyCode) ->
+    keyState = @players[userID].keyState
+    oldState = keyState[keyCode]
+    return oldState isnt (keyState[keyCode] = isDown)
 
   clone: -> (new World()).copy(this)
 

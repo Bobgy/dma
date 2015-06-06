@@ -35,12 +35,11 @@ class Pool extends Container
   # to this pool.
   # @param world {World}: handle to the world
   # @return this
-  update: (world, parent) ->
+  update: (world, otherWorld, parent) ->
     for entity in @pool
       if entity.valid
-        entity.update(world, this)
-    for id, component of @components
-      component.update?(world, this)
+        entity.update(world, otherWorld, this)
+    super(world, otherWorld, parent)
     return this
 
   # Find the first empty slot (with an invalid entity) in the pool

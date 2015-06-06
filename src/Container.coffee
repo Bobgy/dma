@@ -7,34 +7,43 @@ class Container
     @cnt = 0
     @type = 'Container'
 
+  # init will be called only once when the world initializes
+  # @param world {Container*}: the root container
+  # @param parent {Container*}: the parent container
+  # @return this
+  init: (world, otherWorld, parent) ->
+    for id, component of @components
+      component.init?(world, otherWorld, parent)
+    return this
+
   # earlyUpdate will be called recursively over all components
   # @param world {Container*}: the root container
   # @param parent {Container*}: the parent container
   # @return this
-  earlyUpdate: (world, parent) ->
+  earlyUpdate: (world, otherWorld, parent) ->
     for id, component of @components
-      component.earlyUpdate?(world, this)
+      component.earlyUpdate?(world, otherWorld, this)
     return this
 
   # update will be called recursively over all components
   # @param world {Container*}: the root container
   # @param parent {Container*}: the parent container
   # @return this
-  update: (world, parent) ->
+  update: (world, otherWorld, parent) ->
     for id, component of @components
-      component.update?(world, this)
+      component.update?(world, otherWorld, this)
     return this
 
-  # copy from rhs
-  # @param rhs {Container*}
+  # copy from obj
+  # @param obj {Container*}
   # @return this
-  copy: (rhs) ->
-    if not rhs?
-      console.log('Error: copying from rhs which is null or undefined')
+  copy: (obj) ->
+    if not obj?
+      console.log('Error: copying from obj which is null or undefined')
       console.log(this)
-    @id = rhs.id
-    @cnt = rhs.cnt
-    return @copyComponents(rhs)
+    @id = obj.id
+    @cnt = obj.cnt
+    return @copyComponents(obj)
 
   # deep copy this
   # @return {Container}: the cloned container
@@ -42,15 +51,15 @@ class Container
     container = new Container(@id)
     return container.copyComponents(this)
 
-  # copy components from rhs
+  # copy components from obj
   # components with property copyable will be copied
-  # existing component will be copied by the copy(rhs) function
+  # existing component will be copied by the copy(obj) function
   # nonexisting component will be cloned
-  # @param rhs {Container*}
+  # @param obj {Container*}
   # @return this
-  copyComponents: (rhs) ->
-    @cnt = rhs.cnt
-    for id, component of rhs.components
+  copyComponents: (obj) ->
+    @cnt = obj.cnt
+    for id, component of obj.components
       if component.copyable
         if @components[id]?
           @components[id].copy(component)
@@ -67,25 +76,25 @@ class Container
     @components = null
     return this
 
-  # @param rhs {Object*}
+  # @param obj {Object*}
   # @return this
-  insert: (rhs) ->
-    rhs.id = @cnt++
-    if @components[rhs.id]?
+  insert: (obj) ->
+    obj.id = @cnt++ unless obj.id?
+    if @components[obj.id]?
       console.log('Error: Replacing existing id!')
       console.log(this)
-      console.log(rhs)
-    @components[rhs.id] = rhs
+      console.log(obj)
+    @components[obj.id] = obj
     return this
 
-  # @param rhs {Object*}
+  # @param obj {Object*}
   # @return this
-  remove: (rhs) ->
-    if not @components[rhs.id]?
+  remove: (obj) ->
+    if not @components[obj.id]?
       console.log('Error: Removing nonexistant id!')
       console.log(this)
-      console.log(rhs)
-    delete @components[rhs.id]
+      console.log(obj)
+    delete @components[obj.id]
     return this
 
 module.exports = Container
