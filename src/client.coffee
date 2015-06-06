@@ -23,12 +23,12 @@ loader = new Loader(game, ->
     karr[key] = false
 
   socket.on('sync', (worldID, tick, players, enemies, eventEmitter) ->
-    console.log('sync, server:', tick, 'client:',
-                game.tick, 'delta:', tick-game.tick)
     world = game.worlds[worldID]
+    console.log('sync, server:', tick, 'client:',
+                world.tick, 'delta:', tick-world.tick)
     oldTick = world.tick
     world.sync(tick, players, enemies, eventEmitter)
-    world.components.eventEmitter.copy(history, tick) if world.id is id
+    world.components.eventEmitter.copy(history, tick) if world.id is worldID
     if tick > oldTick or tick + 5 < oldTick
       console.log('Synchronizing...')
       for i in [1..3]
@@ -41,7 +41,7 @@ loader = new Loader(game, ->
     console.log(user_id, 'key', msg, 'send', tick, ', rec', game.tick)
     if not (user_id == id)
       game.worlds[user_id].components.eventEmitter.
-           pushEvent('key', tick, user_id, isDown, msg)
+           pushEvent('key', tick, 0, isDown, msg)
   )
   socket.on('Servant', (tick, worldID, servant) ->
     game.worlds[worldID].components.eventEmitter.
@@ -73,6 +73,6 @@ loader = new Loader(game, ->
         karr[keyCode] = false
   document.onkeyup = upKeyCode
 
-  @game.start(15, true)
+  @game.start(15, false)
 )
 loader.load()

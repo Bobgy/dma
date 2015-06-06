@@ -80,9 +80,11 @@ class World extends Container
       if @stage?
         for sprite in @stage.removeChildren()
           sprite.destroy()
+      @components.enemies.cnt = enemies.cnt
       for id, entity of enemies.components
         @importEntity(@components.enemies, entity)
     @components.eventEmitter.clearEvent().copy(eventEmitter) if eventEmitter?
+    @game.tick = @tick
     return this
 
   copy: (obj) ->

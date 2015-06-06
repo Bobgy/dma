@@ -30,8 +30,7 @@ class Game extends Container
   update: =>
     @tick++
     @worlds[i].earlyUpdate(@worlds[i], @worlds[i^1]) for i in [0..1]
-    for i in [0..1]
-      @worlds[i].update(@worlds[i^1])
+    @worlds[i].update(@worlds[i^1]) for i in [0..1]
     requestAnimationFrame(@animate) if @PIXI?
 
   animate: =>

@@ -22,11 +22,12 @@ sockets = []
 keys = [16, 65, 68, 83, 87, 191]
 movementKeys = keys.slice(0, 5)
 
-game.start(15, true)
+game.start(15, false)
 synchronize = () ->
   for world in game.worlds
     io.emit('sync', world.id, world.tick, world.players,
             world.components.enemies, world.components.eventEmitter)
+    console.log('world',world.id,', tick',world.tick)
 
 setInterval(synchronize, 2000)
 
