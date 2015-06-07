@@ -24,7 +24,7 @@ class Bullet extends Entity
         if  player.valid and
             player.faction isnt @faction and
             player.testCollision(this)
-          player.die()
+          player.die(world)
           @die()
           break
     return this

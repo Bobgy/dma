@@ -2,6 +2,7 @@ Vec2 = require('./Vec2.coffee')
 Entity = require('./Entity.coffee')
 Servant = require('./Servant.coffee')
 SkillSummonServant = require('./scripts/skills/SummonServant.coffee')
+Timer = require('./Timer.coffee')
 
 # a basic player
 class Player extends Entity
@@ -41,10 +42,18 @@ class Player extends Entity
     return this
 
 
-  die: ->
+  die: (world) ->
     console.log('Player ', @id, 'died!')
     @valid = false
     @components.sprite?.visible = false
+    world.insert(new Timer('resurrectTimer', 132, false, 0, (world) ->
+      @players[0].wake()
+    ))
+    return this
+
+  wake: () ->
+    @valid = true
+    @components.sprite?.visible = true
     return this
 
   # @param rhs {Player}

@@ -13,7 +13,7 @@ class BulletEmitter extends Entity
     bullet = new Bullet(null, new Vec2(), new Vec2(), 10)
     @insert(new Pool('pool', 64, bullet))
     fire = @fireMore.bind(this, @n_way, @angle_delta)
-    @insert(new Timer('fireTimer', @cd, fire, true, -60))
+    @insert(new Timer('fireTimer', @cd, true, -60, fire))
     @type = 'BulletEmitter'
     @copyable = true
     @checkSanity()

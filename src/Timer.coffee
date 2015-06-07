@@ -20,8 +20,8 @@ class Timer extends Ticker
   # @param callback {function(world, parent)}
   # @param periodic {boolean}
   # @param currentTick {int}
-  constructor: (@id='', @interval=0, @callback,
-                @periodic=true, currentTick=0) ->
+  constructor: (@id='', @interval=0, @periodic=true,
+                currentTick=0, @callback) ->
     super(@id, currentTick)
     @copyable = true
   update: (world, parent) ->
@@ -41,6 +41,6 @@ class Timer extends Ticker
     @currentTick = rhs.currentTick
     @callback = rhs.callback unless @callback?
     return this
-  clone: -> new Timer(@id, @interval, @callback, @periodic, currentTick)
+  clone: -> new Timer(@id, @interval, @periodic, @currentTick, @callback)
 
 module.exports = Timer
