@@ -1,7 +1,8 @@
 Vec2 = require('./Vec2.coffee')
 Entity = require('./Entity.coffee')
 Utility = require('./Utility.coffee')
-BulletEmitter = require('./BulletEmitter.coffee')
+BulletEmitter = require("../scripts/patterns/BulletEmitter.coffee")
+RandomBulletEmitter = require("../scripts/patterns/RandomBulletEmitter.coffee")
 
 class Servant extends Entity
   # @param pos {Vec2}
@@ -10,13 +11,19 @@ class Servant extends Entity
   # @param face {Vec2}
   # @param timeToLive {int(tick)}
   constructor: (id, pos=new Vec2(), v=new Vec2(),
-                @face=new Vec2(), @timeToLive = 666) ->
+                @face=new Vec2(), @timeToLive = 666
+                , random=false) ->
     super(id, pos, v)
-    @insert(new BulletEmitter('bulletEmitter', @pos, null, null, @face.clone()))
+    if random?
+      emitter = unless random
+        new BulletEmitter('emitter', @pos, null, @face.clone())
+      else
+        new RandomBulletEmitter('emitter', @pos, null, @face.clone())
+      @insert(emitter)
     @type = 'Servant'
 
-  # inehrits init: (world, parent)
-  
+  # inherits init: (world, parent) ->
+
   # @param world {Container*}
   # @param parent {Container*}
   update: (world, parent) ->
@@ -28,6 +35,10 @@ class Servant extends Entity
 
   # @param obj {Servant}
   copy: (obj) ->
+    #unless @components.emitter?
+    #  type = eval(obj.components.emitter.type)
+    #  emitter = new type('emitter', obj.pos, null, obj.face.clone())
+    #  @insert(emitter)
     super(obj)
     @face.copy(obj.face)
     @timeToLive = obj.timeToLive

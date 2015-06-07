@@ -8,7 +8,7 @@ class SkillSummonServant extends Skill
 
   cast: (world, parent) ->
     servant = new Servant(null, parent.pos.clone(),
-                          new Vec2(), parent.face)
+                          new Vec2(), parent.face)#, Math.random() > 0.5)
     world.game.getWorld(world.id^1).get('eventEmitter').pushEvent(
       'Servant', world.tick + 1, world.tick + 1, servant
     )

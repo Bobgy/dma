@@ -1,7 +1,6 @@
 module.exports =
   AccurateInterval: require('./AccurateInterval.coffee')
   Bullet:           require('./Bullet.coffee')
-  BulletEmitter:    require('./BulletEmitter.coffee')
   Container:        require('./Container.coffee')
   Entity:           require('./Entity.coffee')
   Game:             require('./Game.coffee')

@@ -24,4 +24,10 @@ destroyDisplayObject = (obj) ->
     obj.parent.removeChild(obj)
   obj.destroy()
 
-module.exports = {FPSLogger, destroyDisplayObject}
+# for packaging (key, value) pairs of arguments
+setArgs = (args, obj) ->
+  for key, value of obj
+    args[key] = value
+  return args
+
+module.exports = {FPSLogger, destroyDisplayObject, setArgs}
