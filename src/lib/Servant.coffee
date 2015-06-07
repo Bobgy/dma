@@ -15,6 +15,8 @@ class Servant extends Entity
     @insert(new BulletEmitter('bulletEmitter', @pos, null, null, @face.clone()))
     @type = 'Servant'
 
+  # inehrits init: (world, parent)
+  
   # @param world {Container*}
   # @param parent {Container*}
   update: (world, parent) ->

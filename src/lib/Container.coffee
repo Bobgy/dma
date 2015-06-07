@@ -7,12 +7,12 @@ class Container
     @cnt = 0
     @type = 'Container'
 
-  # init will be called only once when the world initializes
+  # init will be called when inserted into a container in a world
   # @param world {Container*}: the root container
   # @param parent {Container*}: the parent container
   init: (world, parent) ->
     for id, component of @components
-      component.init?(world, parent)
+      component.init?(world, this)
     return this
 
   # earlyUpdate will be called recursively over all components
@@ -76,17 +76,25 @@ class Container
       console.log('parent:', parent)
     return this
 
-  # @param obj {Object*}
-  insert: (obj) ->
-    obj.id = @cnt++ unless obj.id?
-    if @components[obj.id]?
-      console.log('Error: Replacing existing id!')
+  get: (id) ->
+    if not @components[id]?
       console.log(this)
-      console.log(obj)
-    @components[obj.id] = obj
-    return this
+      throw new Error("Getting nonexistant component #{id}")
+    return @components[id]
 
   # @param obj {Object*}
+  # @param world {World, optional}: call init when provided
+  insert: (obj, world) ->
+    obj.id = @cnt++ unless obj.id?
+    if @components[obj.id]?
+      console.log(this)
+      console.log(obj)
+      throw new Error("Replacing existing id: #{obj.id}")
+    @components[obj.id] = obj
+    obj.init?(world, this) if world?
+    return this
+
+  # @param id {string/integer}
   remove: (id) ->
     if not @components[id]?
       console.log("Error: Removing nonexistant id: #{id}!")

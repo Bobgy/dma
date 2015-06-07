@@ -19,15 +19,17 @@ class World extends Container
   constructor: (id='world', @w=1024, @h=720, @PIXI) ->
     super(id)
 
+    @stage = new @PIXI.Container() if @PIXI?
+
     @players = []
-    @insert(new Container('enemies'))
-    @insert(new Utility.FPSLogger(@verbose, 'Logger_' + id)) if @verbose
-    @insert(new EventEmitter('eventEmitter'))
+    @insert(new Container('pools'), this)
+    @insert(new Container('enemies'), this)
+    @insert(new Utility.FPSLogger(@verbose, 'Logger_' + id), this) if @verbose
+    @insert(new EventEmitter('eventEmitter'), this)
     @components.eventEmitter.on('key', @keyAction)
     @components.eventEmitter.on('sync', @sync)
     @tick = 0
 
-    @stage = new @PIXI.Container() if @PIXI?
     @game = null
     @process = null
 
@@ -39,7 +41,7 @@ class World extends Container
 
   # @param entity {Entity*}: require entity.faction being valid
   addEntity: (entity) ->
-    @components.enemies.insert(entity)
+    @components.enemies.insert(entity, this)
     return this
 
   earlyUpdate: ->
@@ -56,21 +58,10 @@ class World extends Container
   importEntity: (container, entity) ->
     newEntity = EntityFactory(eval(entity.type), entity)
     if container.type?
-      container.insert(newEntity)
+      container.insert(newEntity, this)
     else
       container.push(newEntity)
-    PIXI = @game.PIXI
-    if PIXI?
-      if entity.type is 'Servant'
-        spritePool = newEntity.components.bulletEmitter.
-                               components.pool.initSprite(
-          @game.assets['Bullet'].texture, PIXI
-        )
-        @stage.addChild(spritePool)
-      texture = @game.assets[entity.type].texture
-      newEntity.initSprite(texture, PIXI)
-      if entity.type isnt 'Player'
-        @stage.addChild(newEntity.components.sprite)
+      newEntity.init?(this, container)
     return this
 
   # synchronize the game with given arguments
@@ -78,19 +69,31 @@ class World extends Container
   # @param players {Array of Players}
   # @param enemies {Container*}
   # @param eventEmitter {EventEmitter}
-  sync: (tick, players, enemies, eventEmitter) ->
+  sync: (tick, players, enemies, eventEmitter, pools) ->
     @tick = tick
     @players = []
+
     for player in players
       @importEntity(@players, player)
-    if enemies?
-      @components.enemies = new Container('enemies')
+
+    if pools? or enemies?
       if @stage?
         for sprite in @stage.removeChildren()
           sprite.destroy()
+
+    if pools?
+      @components.pools = new Container('pools')
+      for id, pool of pools.components
+        newPool = Pool.create(pool, eval(pool.pool[0].type))
+        @components.pools.insert(newPool, this)
+      @components.pools.cnt = pools.cnt
+
+    if enemies?
+      @components.enemies = new Container('enemies')
       @components.enemies.cnt = enemies.cnt
       for id, entity of enemies.components
         @importEntity(@components.enemies, entity)
+
     @components.eventEmitter.clearEvent().copy(eventEmitter) if eventEmitter?
     return this
 

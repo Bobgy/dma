@@ -23,7 +23,7 @@ loader = new Loader(game, ->
     karr[key] = false
 
   verbose = false
-  socket.on('sync', (worldID, tick, players, enemies, eventEmitter) ->
+  socket.on('sync', (worldID, tick, players, enemies, eventEmitter, pools) ->
     world = game.worlds[worldID]
     oldTick = world.tick
 
@@ -32,10 +32,12 @@ loader = new Loader(game, ->
       oldPos = world.players[0].pos.clone() if world.players[0]?
     # End
 
-    world.sync(tick, players, enemies, eventEmitter)
+    world.sync(tick, players, enemies, eventEmitter, pools)
     if world.id is id
-      console.log('sync, server:', tick, 'client:',
-                  oldTick, 'delta:', oldTick-tick)
+      delta = oldTick - tick
+      unless 1 < delta < 10
+        console.log('sync, server:', tick, 'client:',
+                    oldTick, 'delta:', oldTick-tick)
       world.components.eventEmitter.copy(history, tick)
       if tick+1 < oldTick < tick+10
         while world.tick < oldTick

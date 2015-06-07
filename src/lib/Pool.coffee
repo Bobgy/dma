@@ -8,10 +8,10 @@ Utility = require('./Utility.coffee')
 class Pool extends Container
   # @param size {int}: the pool size
   # @param entity {Entity*}: the template for entities
-  constructor: (id, size, entity) ->
+  constructor: (id, @size, entity) ->
     super(id)
-    @pool = new Array(size)
-    for i in [0..size-1]
+    @pool = new Array(@size)
+    for i in [0..@size-1]
       @pool[i] = entity.clone()
       @pool[i].id = i
       @pool[i].valid = false
@@ -31,6 +31,14 @@ class Pool extends Container
       entity.initSprite(texture, PIXI)
       spritePool.addChild(entity.components.sprite)
     return spritePool
+
+  init: (world, parent) ->
+    PIXI = world.game.PIXI
+    if PIXI?
+      texture = world.game.assets['Bullet'].texture
+      world.stage.addChild(@initSprite(texture, PIXI))
+    super(world, parent)
+    return this
 
   # Update the entities when entity.valid = true.
   # They will be called by `update(world, parent)` where parent refers
@@ -62,9 +70,14 @@ class Pool extends Container
 
   copy: (obj) ->
     super(obj)
+    @size = obj.size
     for entity in @pool
       entity.copy(obj.pool[entity.id])
     return this
+
+  clone: () ->
+    pool = new Pool(@id, @size, @pool[0])
+    return pool.copy(this)
 
 Pool.create = (obj, Type) ->
   entity = if Type? then new Type() else new Entity()

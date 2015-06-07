@@ -13,9 +13,21 @@ class Entity extends Container
     @valid = true
     @type = 'Entity'
 
+  init: (world, parent) ->
+    if not @components.sprite?
+      PIXI = world.game.PIXI
+      if PIXI?
+        assets = world.game.assets
+        if assets[@type]?
+          texture = assets[@type].texture
+          sprite = @initSprite(texture, PIXI)
+          if @type isnt 'Player'
+            world.stage.addChild(sprite)
+    super(world, parent)
+    return this
+
   # @param world {Container*}
   # @param parent {Container*}
-
   update: (world, parent) ->
     return this unless @valid
     @pos.set(@pos.x + @v.x, @pos.y + @v.y)
@@ -24,7 +36,6 @@ class Entity extends Container
     return super(world, parent)
 
   # @param obj {Entity*}
-
   copy: (obj) ->
     super(obj)
     @pos.copy(obj.pos)
@@ -38,7 +49,6 @@ class Entity extends Container
     entity = new Entity(@id, new Vec2(), new Vec2())
     return entity.copy(this)
 
-
   destroy: (world, parent) ->
     @pos = null
     @v = null
@@ -47,17 +57,16 @@ class Entity extends Container
   # init sprite for this entity using texture
   # @param texture {PIXI.Texture}
   # @param PIXI {Module}
-
+  # @return {Sprite}
   initSprite: (texture, PIXI) ->
     if @components.sprite?
-      console.log('Error: Entity already has a sprite.')
       console.log(this)
-      return this
+      throw new Error("Entity #{@id} already has a sprite.")
     sprite = new PIXI.Sprite(texture)
     sprite.anchor.set(0.5, 0.5)
     sprite.position = @pos
     sprite.visible = @valid
     @components.sprite = sprite
-    return this
+    return sprite
 
 module.exports = Entity

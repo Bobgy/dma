@@ -27,7 +27,8 @@ game.start(15, false)
 synchronize = () ->
   for world in game.worlds
     io.emit('sync', world.id, world.tick, world.players,
-            world.components.enemies, world.components.eventEmitter)
+            world.get('enemies'), world.get('eventEmitter'),
+            world.get('pools'))
 
 setInterval(synchronize, 2000)
 

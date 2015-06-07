@@ -27,7 +27,6 @@ class Player extends Entity
 
   # @param world {Container*}
   # @param parent {Container*}
-
   update: (world, parent) ->
     return this unless @valid
     @mana = Math.min(@mana + 1, @maxMana)
@@ -46,9 +45,10 @@ class Player extends Entity
     console.log('Player ', @id, 'died!')
     @valid = false
     @components.sprite?.visible = false
-    world.insert(new Timer('resurrectTimer', 132, false, 0, (world) ->
+    timer = new Timer('resurrectTimer', 132, false, 0, (world) ->
       @players[0].wake()
-    ))
+    )
+    world.insert(timer)
     return this
 
   wake: () ->
