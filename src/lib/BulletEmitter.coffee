@@ -25,6 +25,7 @@ class BulletEmitter extends Entity
       bullet = new Bullet(null, new Vec2(), new Vec2(), 10)
       pool = new Pool(null, 64, bullet)
       world.get('pools').insert(pool, world)
+      pool.active = true
       @poolID = pool.id
       super(world, parent)
     return this
@@ -46,6 +47,7 @@ class BulletEmitter extends Entity
 
   destroy: (world, parent) ->
     @face = null
+    world.get('pools').get(@poolID).active = false if @poolID?
     super(world, parent)
     return this
 

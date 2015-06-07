@@ -18,14 +18,14 @@ class Bullet extends Entity
         @pos.y < @r or
         @pos.x > world.w - @r or
         @pos.y > world.h - @r
-      @die()
+      @die(world, parent)
     else
       for player in world.players
         if  player.valid and
             player.faction isnt @faction and
             player.testCollision(this)
           player.die(world)
-          @die()
+          @die(world, parent)
           break
     return this
 
@@ -35,9 +35,10 @@ class Bullet extends Entity
     bullet.id = @id
     return bullet.copyComponents(this)
 
-  die: ->
+  die: (world, parent) ->
     @valid = false
     @components.sprite?.visible = false
+    parent.size-- if parent.pool?
     return this
 
   wake: ->

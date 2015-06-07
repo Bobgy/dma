@@ -70,10 +70,7 @@ class Container
     for id, component of @components
       component.destroy?(world, this)
     @components = null
-    if parent?
-      parent.remove(@id)
-    else
-      console.log('parent:', parent)
+    parent.remove(@id) if parent?
     return this
 
   get: (id) ->
