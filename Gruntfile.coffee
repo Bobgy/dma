@@ -10,7 +10,8 @@ module.exports = (grunt) ->
 				src: 'src/client.coffee'
 				dest: 'js/bundle.js'
 		watch:
-			files: ['src/*.coffee', 'src/scripts/skills/*.coffee', 'src/scripts/*.coffee']
+			files: ['src/*.coffee', 'src/scripts/skills/*.coffee',
+			        'src/scripts/*.coffee', 'src/lib/*.coffee']
 			tasks: ['coffeeify']
 	)
 

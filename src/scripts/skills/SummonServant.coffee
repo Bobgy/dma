@@ -1,6 +1,6 @@
-Vec2 = require('../../Vec2.coffee')
-Skill = require('../../Skill.coffee')
-Servant = require('../../Servant.coffee')
+Vec2 = require('../../lib/Vec2.coffee')
+Skill = require('../../lib/Skill.coffee')
+Servant = require('../../lib/Servant.coffee')
 
 class SkillSummonServant extends Skill
   constructor: (@id, @coolDown=120, @manaCost=240, @currentTick=0) ->

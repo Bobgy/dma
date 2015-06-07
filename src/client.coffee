@@ -1,8 +1,7 @@
-Vec2 = require('./Vec2.coffee')
-World = require('./World.coffee')
-Game = require('./Game.coffee')
+Core = require('./lib/Core.coffee')
+for id, mod of Core
+  eval("#{id}=Core.#{id}")
 Loader = require('./AssetsLoader.coffee')
-[EventEmitter, FixedsizeEventEmitter] = require('./EventEmitter.coffee')
 
 game = new Game('client', PIXI)
 id = -1

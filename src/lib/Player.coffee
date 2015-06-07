@@ -1,7 +1,7 @@
 Vec2 = require('./Vec2.coffee')
 Entity = require('./Entity.coffee')
 Servant = require('./Servant.coffee')
-SkillSummonServant = require('./scripts/skills/SummonServant.coffee')
+SkillSummonServant = require('../scripts/skills/SummonServant.coffee')
 Timer = require('./Timer.coffee')
 
 # a basic player
@@ -69,7 +69,6 @@ class Player extends Entity
     @keyState.splice(0, keyState.length)
     @keyState = null
     return super(world, parent)
-
 
   # @param rhs {bullet}
   # @return {bool}

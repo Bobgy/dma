@@ -1,7 +1,7 @@
 Container = require('./Container.coffee')
 World = require('./World.coffee')
 AccurateInterval = require('./AccurateInterval.coffee')
-SkillSummonServant = require('./scripts/skills/SummonServant.coffee')
+SkillSummonServant = require('../scripts/skills/SummonServant.coffee')
 class Game extends Container
   w: 1024
   h: 720
