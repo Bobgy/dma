@@ -33,7 +33,7 @@ class Timer extends Ticker
       else
         @valid = false
         delete parent.components[@id]
-      @callback(world, parent)
+      @callback.call(parent, world)
     return this
   copy: (rhs) ->
     super(rhs)

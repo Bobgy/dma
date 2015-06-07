@@ -6,12 +6,14 @@ Timer = require('./Timer.coffee')
 
 class BulletEmitter extends Entity
   bullet_speed: 4
-
-  constructor: (id, pos=new Vec2(), v=new Vec2(), @cd=30, @face) ->
+  constructor: (id, pos=new Vec2(), v=new Vec2(),
+                @cd=30, @face, @homing=true,
+                @n_way=3,@angle_delta=15) ->
     super(id, pos, v)
     bullet = new Bullet(null, new Vec2(), new Vec2(), 10)
-    @insert(new Pool('pool', 10, bullet))
-    @insert(new Timer('fireTimer', @cd, @fire, true, -60))
+    @insert(new Pool('pool', 64, bullet))
+    fire = @fireMore.bind(this, @n_way, @angle_delta)
+    @insert(new Timer('fireTimer', @cd, fire, true, -60))
     @type = 'BulletEmitter'
     @copyable = true
     @checkSanity()
@@ -24,27 +26,42 @@ class BulletEmitter extends Entity
       return false
     return true
 
-  # inherits update: (world, parent)
+  # use homing to toggle whether it targets the enemey
+  update: (world, parent) ->
+    player = world.players[0]
+    if @homing and player? and player.valid
+      @face = world.players[0].pos.sub(@pos).normalize()
+    super(world, parent)
 
   destroy: (world, parent) ->
     @face = null
     super(world, parent)
     return this
 
-  # fire only works as a callback function to timer
   # @param world {World}
-  # @param parent {Container*}
-  fire: (world, parent) ->
-    bullet = parent.components.pool.findFirstEmptySlot()
+  # @param face {Vec2}: the facing direction
+  fire: (world, face=@face) ->
+    bullet = @components.pool.findFirstEmptySlot()
     if not bullet.valid
-      bullet.pos.copy(parent.pos.add(parent.face))
-      bullet.v = parent.face.scale(parent.bullet_speed)
-      bullet.faction = parent.faction
+      bullet.pos.copy(@pos.add(face))
+      bullet.v = face.scale(@bullet_speed)
+      bullet.faction = @faction
       bullet.wake()
     else
       console.log('Error: BulletPool is full!')
-      console.log(parent.components.pool)
+      console.log(@components.pool)
     return this
+
+  fireMore: (nWay=1, deltaAngle=15, world) ->
+    delta = Vec2.degToRad*deltaAngle
+    n = Math.floor(nWay/2)
+    if nWay % 2 == 1
+      for i in [-n..n]
+        @fire(world, @face.rotate(delta*i))
+    else
+      for i in [1..n]
+        @fire(world, @face.rotate(delta*(i-0.5)))
+        @fire(world, @face.rotate(-delta*(i-0.5)))
 
   copy: (obj) ->
     super(obj)

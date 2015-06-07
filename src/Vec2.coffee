@@ -7,6 +7,11 @@ class Vec2
   dotMul: (rhs) -> @x * rhs.x + @y * rhs.y
   crossMul: (rhs) -> @x * rhs.y - @y * rhs.x
   length: -> Math.sqrt(@x * @x + @y * @y)
+  normalize: (len=1) -> @scale(len/@length())
+  rotate: (rad) -> # counter clockwise rotation
+    c = Math.cos(rad)
+    s = Math.sin(rad)
+    new Vec2(@x*c-@y*s, @x*s+@y*c)
   sync: (rhs) ->
     @x = rhs.x
     @y = rhs.y
@@ -18,5 +23,6 @@ class Vec2
   equals: (rhs) ->
     rhs.x == @x and rhs.y == @y
   copy: (rhs) -> @set(rhs.x, rhs.y)
+Vec2.degToRad = Math.PI/180
 
 module.exports = Vec2
