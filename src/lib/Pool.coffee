@@ -39,7 +39,7 @@ class Pool extends Container
   init: (world, parent) ->
     PIXI = world.game.PIXI
     if PIXI?
-      texture = world.game.assets['Bullet'].texture
+      texture = world.game.assets['Bullet'+world.id].texture
       world.stage.addChild(@initSprite(texture, PIXI))
     super(world, parent)
     return this

@@ -19,8 +19,11 @@ class Entity extends Container
       PIXI = world.game.PIXI
       if PIXI?
         assets = world.game.assets
-        if assets[@type]?
+        if @type is 'Bullet'
+          texture = assets[@type+world.id].texture
+        else if assets[@type]?
           texture = assets[@type].texture
+        if texture?
           sprite = @initSprite(texture, PIXI)
           if @type isnt 'Player'
             world.stage.addChild(sprite)
