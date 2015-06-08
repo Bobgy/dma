@@ -1,10 +1,10 @@
 # EventEmitter contains events
 # Events should have (name, tick, args...)
 class EventEmitter
-  copyable: true
   constructor: (@id) ->
     @list = []
     @listeners = new Object()
+    @copyable = true
 
   # @return {int}: the index of pushed event
   pushEvent: (name, tick, args...) ->

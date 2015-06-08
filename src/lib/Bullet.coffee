@@ -6,8 +6,8 @@ class Bullet extends Entity
   # @param pos {Vec2}: position
   # @param v {Vec2}: velocity
   # @param r {float}: radius
-  constructor: (id, pos=new Vec2(), v=new Vec2(), @r=0) ->
-    super(id, pos, v)
+  constructor: (args, id, pos=new Vec2(), v=new Vec2(), @r=0) ->
+    super(args, id, pos, v)
     @type = 'Bullet'
 
   update: (world, parent) ->
@@ -16,13 +16,12 @@ class Bullet extends Entity
     # remove when out of screen
     if  @pos.x < @r or
         @pos.y < @r or
-        @pos.x > world.w - @r or
-        @pos.y > world.h - @r
+        @pos.x > world.args.w - @r or
+        @pos.y > world.args.h - @r
       @die(world, parent)
     else
       for player in world.players
         if  player.valid and
-            player.faction isnt @faction and
             player.testCollision(this)
           player.die(world)
           @die(world, parent)
@@ -31,8 +30,7 @@ class Bullet extends Entity
 
   # @return {Bullet}
   clone: ->
-    bullet = new Bullet(@id, @pos.clone(), @v.clone(), @r)
-    bullet.id = @id
+    bullet = new Bullet(@args, @id, @pos.clone(), @v.clone(), @r)
     return bullet.copyComponents(this)
 
   die: (world, parent) ->
@@ -62,7 +60,7 @@ class Bullet extends Entity
   # inherits `destroy: ->`
 
 Bullet.create = (rhs) ->
-  bullet = new Bullet(rhs.id, rhs.pos.clone(), rhs.v.clone(), rhs.r)
+  bullet = new Bullet(rhs.args, rhs.id, rhs.pos.clone(), rhs.v.clone(), rhs.r)
   bullet.valid = rhs.valid
   return bullet.copyComponents(rhs)
 

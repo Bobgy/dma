@@ -1,34 +1,50 @@
-class Ticker
+Container = require('./Container.coffee')
+
+class Ticker extends Container
+  # @param args:
+  #   initTick {int}: the initial tick
+  #
   # @param id {string}
-  # @param tick {int}
-  constructor: (@id, @tick) ->
+  constructor: (args, id, @tick) ->
+    super(args, id)
     @valid = true
-  update: -> @tick++
-  clone: ->
-    ticker = new Ticker(@id, @tick)
-    ticker.valid = @valid
-    return this
+
+  update: (world, parent) ->
+    super(world, parent)
+    @tick++ if @valid
+
+  clone: -> (new Ticker(args)).copy(this)
+
   copy: (rhs) ->
-    @id = rhs.id
+    super(rhs)
     @tick = rhs.tick
     @valid = rhs.valid
     return this
 
 class Timer extends Ticker
+  # @param args:
+  #   interval {int}
+  #   periodic {boolean}
+  #
   # @param id {string}
   # @param interval {int}
   # @param callback {function(world, parent)}
   # @param periodic {boolean}
   # @param currentTick {int}
-  constructor: (@id='', @interval=0, @periodic=true,
-                currentTick=0, @callback) ->
-    super(@id, currentTick)
+  constructor: (args, id, initTick=0, @callback) ->
+    super(args, id, initTick)
     @copyable = true
+  preset: ->
+    super()
+    args =
+      interval: 0
+      periodic: true
+    Utility.setArgs(@args, args)
   update: (world, parent) ->
     return this unless @valid
-    super()
-    if @tick == @interval
-      if @periodic
+    super(world, parent)
+    if @tick == @args.interval
+      if @args.periodic
         @tick = 0
       else
         @valid = false
@@ -37,10 +53,8 @@ class Timer extends Ticker
     return this
   copy: (rhs) ->
     super(rhs)
-    @interval = rhs.interval
-    @currentTick = rhs.currentTick
     @callback = rhs.callback unless @callback?
     return this
-  clone: -> new Timer(@id, @interval, @periodic, @currentTick, @callback)
+  clone: -> new Timer(@args, @id, @currentTick, @callback)
 
 module.exports = Timer

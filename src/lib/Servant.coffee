@@ -10,17 +10,23 @@ class Servant extends Entity
   # @param cd {int}
   # @param face {Vec2}
   # @param timeToLive {int(tick)}
-  constructor: (id, pos=new Vec2(), v=new Vec2(),
-                @face=new Vec2(), @timeToLive = 666
-                , random=false) ->
-    super(id, pos, v)
-    if random?
-      emitter = unless random
-        new BulletEmitter('emitter', @pos, null, @face.clone())
-      else
-        new RandomBulletEmitter('emitter', @pos, null, @face.clone())
-      @insert(emitter)
+  constructor: (args, id, pos=new Vec2(), v=new Vec2(),
+                @face=new Vec2()) ->
+    super(args, id, pos, v)
+    emitter = unless @args.random
+      new BulletEmitter(null, 'emitter', @pos, null, @face.clone())
+    else
+      new RandomBulletEmitter(null, 'emitter', @pos, null, @face.clone())
+    @insert(emitter)
+    @args.timeToLive
     @type = 'Servant'
+
+  preset: ->
+    super()
+    args =
+      timeToLive: 666
+      random: false
+    Utility.setArgs(@args, args)
 
   # inherits init: (world, parent) ->
 
@@ -29,8 +35,8 @@ class Servant extends Entity
   update: (world, parent) ->
     return this unless @valid
     super(world, parent)
-    @timeToLive--
-    @destroy(world, world.components.enemies) if @timeToLive <= 0
+    @args.timeToLive--
+    @destroy(world, world.components.enemies) if @args.timeToLive <= 0
     return this
 
   # @param obj {Servant}
@@ -41,7 +47,6 @@ class Servant extends Entity
     #  @insert(emitter)
     super(obj)
     @face.copy(obj.face)
-    @timeToLive = obj.timeToLive
     return this
 
   # @param world {World}
@@ -53,6 +58,6 @@ class Servant extends Entity
     super(world, parent)
     return this
 
-Servant.create = (obj) -> (new Servant()).copy(obj)
+Servant.create = (obj) -> (new Servant(obj.args)).copy(obj)
 
 module.exports = Servant

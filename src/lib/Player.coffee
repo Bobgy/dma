@@ -6,38 +6,42 @@ Timer = require('./Timer.coffee')
 
 # a basic player
 class Player extends Entity
-  short_step: 3
-  long_step: 6
-  #     Shift,  A,  D,  S,  W,   /
-  keys: [  16, 65, 68, 83, 87, 191]
-  r: 5 # the collision radius
-  maxMana: 600
-
   # @param id {string}
   # @param pos {Vec2}: position
   # @param v {Vec2}: velocity
   # @param face {Vec2}: facing vector
-  constructor: (id, pos=new Vec2(), v=new Vec2(), @face=new Vec2()) ->
-    super(id, pos, v)
+  constructor: (args, id, pos=new Vec2(), v=new Vec2(), @face=new Vec2()) ->
+    super(args, id, pos, v)
     @keyState = []
     @type = 'Player'
-    for key in @keys
+    for key in @args.keys
       @keyState[key] = false
     @mana = 0
+
+  preset: ->
+    super()
+    args =
+      shortStep: 3
+      longStep: 6
+      #     Shift,  A,  D,  S,  W,   /
+      keys: [  16, 65, 68, 83, 87, 191]
+      r: 5 # collision radiu
+      maxMana: 600
+    Utility.setArgs(@args, args)
 
   # @param world {Container*}
   # @param parent {Container*}
   update: (world, parent) ->
     return this unless @valid
-    @mana = Math.min(@mana + 1, @maxMana)
-    step = if @keyState[16] then @short_step else @long_step
+    @mana = Math.min(@mana + 1, @args.maxMana)
+    step = if @keyState[16] then @args.shortStep else @args.longStep
     @v.x = (@keyState[68] - @keyState[65]) * step
     @v.y = (@keyState[83] - @keyState[87]) * step
     super(world, parent)
     @pos.x = Math.max(20, @pos.x)
     @pos.y = Math.max(20, @pos.y)
-    @pos.x = Math.min(world.w-20, @pos.x)
-    @pos.y = Math.min(world.h-20, @pos.y)
+    @pos.x = Math.min(world.args.w-20, @pos.x)
+    @pos.y = Math.min(world.args.h-20, @pos.y)
     return this
 
 
@@ -45,9 +49,9 @@ class Player extends Entity
     console.log('Player ', @id, 'died!')
     @valid = false
     @components.sprite?.visible = false
-    timer = new Timer('resurrectTimer', 132, false, 0, (world) ->
-      @players[0].wake()
-    )
+    callback = (world) -> @players[0].wake()
+    timer = new Timer({interval: 132, periodic: false},
+                      'resurrectTimer', 0, callback)
     world.insert(timer)
     return this
 
@@ -76,6 +80,6 @@ class Player extends Entity
     return rhs.valid && (@pos.sub(rhs.pos)).length() <= rhs.r
 
 Player.create = (rhs) ->
-  (new Player()).copy(rhs)
+  (new Player(rhs.args)).copy(rhs)
 
 module.exports = Player

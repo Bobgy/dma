@@ -3,18 +3,17 @@ World = require('./World.coffee')
 AccurateInterval = require('./AccurateInterval.coffee')
 SkillSummonServant = require('../scripts/skills/SummonServant.coffee')
 class Game extends Container
-  w: 1024
-  h: 720
   # @param id {string/integer}
   # @param PIXI {module}
-  constructor: (id='game', @PIXI) ->
-    super(id)
-    @worlds = [new World(0, @w, @h, @PIXI),
-              new World(1, @w, @h, @PIXI)]
+  constructor: (args, id='game', @PIXI) ->
+    super(args, id)
+    @worlds = [new World(@args, 0, @PIXI),
+              new World(@args, 1, @PIXI)]
     for world in @worlds
       world.game = this
     if @PIXI?
-      @renderer = @PIXI.autoDetectRenderer(@w, @h, {backgroundColor : 0x66ccff})
+      @renderer = @PIXI.autoDetectRenderer(@args.w, @args.h,
+                                           {backgroundColor : 0x66ccff})
       @stage = new @PIXI.Container()
 
     # stores socket.io handle, should be added later
@@ -22,6 +21,13 @@ class Game extends Container
 
     # init
     SkillSummonServant.init(@worlds[i]) for i in [0..1]
+
+  preset: ->
+    super()
+    args =
+      w: 1024
+      h: 640
+    Utility.setArgs(@args, args)
 
   update: =>
     @worlds[i].earlyUpdate(@worlds[i], @worlds[i^1]) for i in [0..1]

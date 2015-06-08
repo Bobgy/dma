@@ -1,4 +1,6 @@
 Container = require('./Container.coffee')
+Utility = require('./Utility.coffee')
+Vec2 = require('./Vec2.coffee')
 
 # the basic entity of a game
 # contains id, position, velocity and its components
@@ -7,9 +9,8 @@ class Entity extends Container
   # @param id {string}
   # @param pos {Vec2}: position
   # @param v {Vec2}: velocity
-  # @param faction {integer}
-  constructor: (id, @pos, @v, @faction=-1) ->
-    super(id)
+  constructor: (args, id, @pos=new Vec2(), @v=new Vec2()) ->
+    super(args, id)
     @valid = true
     @type = 'Entity'
 
@@ -41,12 +42,11 @@ class Entity extends Container
     @pos.copy(obj.pos)
     @v.copy(obj.v)
     @valid = obj.valid
-    @faction = obj.faction
     return this
 
   # @return {Entity}
   clone: ->
-    entity = new Entity(@id, new Vec2(), new Vec2())
+    entity = new Entity(@args, @id, new Vec2(), new Vec2())
     return entity.copy(this)
 
   destroy: (world, parent) ->

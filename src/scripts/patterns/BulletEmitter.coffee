@@ -11,11 +11,9 @@ class BulletEmitter extends Entity
   # @param id {string/integer}
   # @param pos, v, face {Vec2}: position, velocity, facing direction
   # @param args {Args}: additional arguments
-  constructor: (id, pos=new Vec2(), v=new Vec2(), @face, args) ->
-    @preset()
-    Utility.setArgs(@args, args) if args?
-    super(id, pos, v)
-    @insert(new Timer('fireTimer', @args.interval, true,
+  constructor: (args, id, pos, v, @face) ->
+    super(args, id, pos, v)
+    @insert(new Timer({interval: @args.interval}, 'fireTimer',
                       @args.interval - @args.waitTime, @fireMore))
     @copyable = true
     @poolID = null # initialize at init()
@@ -38,8 +36,8 @@ class BulletEmitter extends Entity
       unless world.get('pools').get(@poolID)?
         throw Error("pool #{@poolID} does not exist")
     else
-      bullet = new Bullet(null, new Vec2(), new Vec2(), 10)
-      pool = new Pool(null, @args.poolSize, bullet)
+      bullet = new Bullet(null, null, new Vec2(), new Vec2(), 10)
+      pool = new Pool(null, null, @args.poolSize, bullet)
       world.get('pools').insert(pool, world)
       pool.active = true
       @poolID = pool.id
@@ -76,7 +74,7 @@ class BulletEmitter extends Entity
       bullet.wake()
     else
       console.log('Error: BulletPool is full!')
-      console.log(@components.pool)
+      console.log(pool)
     return this
 
   fireMore: (world) ->

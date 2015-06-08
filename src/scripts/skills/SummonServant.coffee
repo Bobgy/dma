@@ -3,11 +3,13 @@ Skill = require('../../lib/Skill.coffee')
 Servant = require('../../lib/Servant.coffee')
 
 class SkillSummonServant extends Skill
-  constructor: (@id, @coolDown=120, @manaCost=240, @currentTick=0) ->
+  constructor: (args, id) ->
+    super(args, id)
     @copyable = false
 
   cast: (world, parent) ->
-    servant = new Servant(null, parent.pos.clone(),
+    random = Math.random() < 0.5
+    servant = new Servant({random: random}, null, parent.pos.clone(),
                           new Vec2(), parent.face)#, Math.random() > 0.5)
     world.game.getWorld(world.id^1).get('eventEmitter').pushEvent(
       'Servant', world.tick + 1, world.tick + 1, servant
@@ -17,9 +19,11 @@ class SkillSummonServant extends Skill
 
 SkillSummonServant.init = (world, parent) ->
   world.get('eventEmitter').on('Servant', (tick, servantPrototype) ->
-    servant = (new Servant()).copy(servantPrototype)
+    servant = (new Servant(servantPrototype.args)).copy(servantPrototype)
     @addEntity(servant)
-    console.log("New servant:", servant.type)
+    if world.verbose
+      console.log("New servant:")
+      console.log(servant)
     while tick < @tick
       tick++
       servant.earlyUpdate(this, @components.enemies)

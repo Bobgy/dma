@@ -3,7 +3,7 @@ for id, mod of Core
   eval("#{id}=Core.#{id}")
 Loader = require('./AssetsLoader.coffee')
 
-game = new Game('client', PIXI)
+game = new Game(null, 'client', PIXI)
 id = -1
 socket = io()
 socket.on('userID', (msg) -> id = parseInt(msg) )
@@ -56,7 +56,8 @@ loader = new Loader(game, ->
       # End
   )
   socket.on('key', (user_id, msg, isDown, tick) ->
-    console.log(user_id, 'key', msg, 'send', tick, ', rec', game.worlds[user_id].tick)
+    console.log(user_id, 'key', msg, 'send', tick, ', rec',
+                game.worlds[user_id].tick)
     game.worlds[user_id].components.eventEmitter.
          pushEvent('key', tick, 0, isDown, msg)
   )

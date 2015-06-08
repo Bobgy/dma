@@ -8,8 +8,8 @@ Utility = require('./Utility.coffee')
 class Pool extends Container
   # @param capacity {int}: the pool's capacity
   # @param entity {Entity*}: the template for entities
-  constructor: (id, @capacity, entity) ->
-    super(id)
+  constructor: (args, id, @capacity, entity) ->
+    super(args, id)
     @pool = new Array(@capacity)
     for i in [0..@capacity-1]
       @pool[i] = entity.clone()
@@ -84,7 +84,7 @@ class Pool extends Container
     return this
 
   clone: ->
-    pool = new Pool(@id, @capacity, @pool[0])
+    pool = new Pool(@args, @id, @capacity, @pool[0])
     return pool.copy(this)
 
 # @param obj {Pool}: the pool to copy
@@ -92,7 +92,7 @@ class Pool extends Container
 Pool.create = (obj, Type) ->
   entity = if Type? then new Type() else new Entity()
   entity.copy(obj.pool[0])
-  pool = new Pool(null, obj.pool.length, entity)
+  pool = new Pool(null, null, obj.pool.length, entity)
   return pool.copy(obj)
 
 module.exports = Pool

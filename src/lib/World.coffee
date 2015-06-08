@@ -16,14 +16,14 @@ class World extends Container
   # @param w, h {integer}: width and height of the stage
   # @param PIXI {module, optional}: passed to init graphics
   verbose: false
-  constructor: (id='world', @w=1024, @h=720, @PIXI) ->
-    super(id)
+  constructor: (args, id='world', @PIXI) ->
+    super(args, id)
 
     @stage = new @PIXI.Container() if @PIXI?
 
     @players = []
-    @insert(new Container('pools'), this)
-    @insert(new Container('enemies'), this)
+    @insert(new Container(null, 'pools'), this)
+    @insert(new Container(null, 'enemies'), this)
     @insert(new Utility.FPSLogger(@verbose, 'Logger_' + id), this) if @verbose
     @insert(new EventEmitter('eventEmitter'), this)
     @components.eventEmitter.on('key', @keyAction)
@@ -36,10 +36,9 @@ class World extends Container
   # @param player {Player}
   addPlayer: (player) ->
     player.id = @players.push(player) - 1
-    player.faction = 0
     return this
 
-  # @param entity {Entity*}: require entity.faction being valid
+  # @param entity {Entity*}
   addEntity: (entity) ->
     @components.enemies.insert(entity, this)
     return this
@@ -82,14 +81,14 @@ class World extends Container
           sprite.destroy()
 
     if pools?
-      @components.pools = new Container('pools')
+      @components.pools = new Container(null, 'pools')
       for id, pool of pools.components
         newPool = Pool.create(pool, eval(pool.pool[0].type))
         @components.pools.insert(newPool, this)
       @components.pools.cnt = pools.cnt
 
     if enemies?
-      @components.enemies = new Container('enemies')
+      @components.enemies = new Container(null, 'enemies')
       @components.enemies.cnt = enemies.cnt
       for id, entity of enemies.components
         @importEntity(@components.enemies, entity)
@@ -111,6 +110,6 @@ class World extends Container
     oldState = keyState[keyCode]
     return oldState isnt (keyState[keyCode] = isDown)
 
-  clone: -> (new World()).copy(this)
+  clone: -> (new World(@args)).copy(this)
 
 module.exports = World

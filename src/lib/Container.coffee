@@ -1,11 +1,16 @@
 # A base class that adds methods related to components
 class Container
   # @param id {string}
-  constructor: (@id) ->
+  constructor: (args, @id) ->
+    @preset()
+    Utility.setArgs(@args, args) if args?
     @components = new Object()
     # Object.create(null) will make socket.io unable to send this object
     @cnt = 0
     @type = 'Container'
+
+  # preset your @args
+  preset: -> @args = {}
 
   # init will be called when inserted into a container in a world
   # @param world {Container*}: the root container
@@ -35,8 +40,8 @@ class Container
   # @param obj {Container*}
   copy: (obj) ->
     if not obj?
-      console.log('Error: copying from obj which is null or undefined')
       console.log(this)
+      throw new Error("copying from obj which is null or undefined")
     @id = obj.id
     @cnt = obj.cnt
     return @copyComponents(obj)
@@ -44,7 +49,7 @@ class Container
   # deep copy this
   # @return {Container}: the cloned container
   clone: ->
-    container = new Container(@id)
+    container = new Container(null, @id)
     return container.copyComponents(this)
 
   # copy components from obj
@@ -94,8 +99,8 @@ class Container
   # @param id {string/integer}
   remove: (id) ->
     if not @components[id]?
-      console.log("Error: Removing nonexistant id: #{id}!")
       console.log(this)
+      throw new Error("Removing nonexistant id: #{id}!")
     delete @components[id]
     return this
 

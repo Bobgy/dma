@@ -11,7 +11,7 @@ for id, mod of Core
 
 SkillSummonServant = require('./src/scripts/skills/SummonServant.coffee')
 
-game = new Game('server')
+game = new Game(null, 'server')
 game.io = io
 
 # set routes
@@ -42,8 +42,8 @@ io.on('connection', (socket) ->
   if userID < 2
     pos = new Vec2(300, if userID then 500 else 100)
     face = new Vec2(0, if userID then -1 else 1)
-    player = new Player(userID, pos, new Vec2(), face)
-    player.components.skill = new SkillSummonServant('skill')
+    player = new Player(null, userID, pos, new Vec2(), face)
+    player.components.skill = new SkillSummonServant(null, 'skill')
     game.worlds[userID].addPlayer(player)
 
     socket.on('key', (keyCode, isDown, tick) ->
@@ -51,10 +51,10 @@ io.on('connection', (socket) ->
         socket.broadcast.emit('key', userID, keyCode, isDown, tick)
       world = game.worlds[userID]
       if tick <= world.tick
-        console.log('Warning:', user, 'key', keyCode, 'send', tick, ', rec', world.tick)
+        console.log('Warning:', user, 'key', keyCode,
+                    'send', tick, ', rec', world.tick)
       game.worlds[userID].components.eventEmitter.pushEvent(
-          'key', tick, 0,
-          isDown, keyCode
+        'key', tick, 0, isDown, keyCode
       )
     )
 
