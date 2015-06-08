@@ -17,6 +17,7 @@ class Player extends Entity
     for key in @args.keys
       @keyState[key] = false
     @mana = 0
+    @invincible = false
 
   preset: ->
     super()
@@ -44,14 +45,28 @@ class Player extends Entity
     @pos.y = Math.min(world.args.h-20, @pos.y)
     return this
 
+  hit: (other, world) ->
+    @die(world) unless @invincible
 
   die: (world) ->
-    console.log('Player ', @id, 'died!')
+    console.log('Player', @id, 'died!')
     @valid = false
     @components.sprite?.visible = false
-    callback = (world) -> @players[0].wake()
+    callback = (world) -> @players[0].resurrect(world)
     timer = new Timer({interval: 132, periodic: false},
                       'resurrectTimer', 0, callback)
+    world.insert(timer)
+    return this
+
+  resurrect: (world) ->
+    console.log('Player', @id, 'resurrected!')
+    @wake()
+    @invincible = true
+    callback = (world) ->
+      @players[0].invincible = false
+      console.log('no longer invincible')
+    timer = new Timer({interval: 132, periodic: false},
+                      'invincibleTimer', 0, callback)
     world.insert(timer)
     return this
 
@@ -66,6 +81,7 @@ class Player extends Entity
     @keyState = rhs.keyState
     @face = rhs.face
     @mana = rhs.mana
+    @invincible = rhs.invincible
     return this
 
   destroy: (world, parent) ->

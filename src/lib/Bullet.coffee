@@ -23,7 +23,7 @@ class Bullet extends Entity
       for player in world.players
         if  player.valid and
             player.testCollision(this)
-          player.die(world)
+          player.hit(this, world)
           @die(world, parent)
           break
     return this
