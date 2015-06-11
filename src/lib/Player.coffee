@@ -31,6 +31,11 @@ class Player extends Entity
       maxMana: 600
     util.setArgs(@args, args)
 
+  init: (world, parent) ->
+    super(world, parent)
+    if world.PIXI?
+      @insert(new Player.BlinkWhenInvincible())
+
   # @param world {Container*}
   # @param parent {Container*}
   update: (world, parent) ->
@@ -44,6 +49,7 @@ class Player extends Entity
     @pos.y = Math.max(20, @pos.y)
     @pos.x = Math.min(world.args.w-20, @pos.x)
     @pos.y = Math.min(world.args.h-20, @pos.y)
+
     return this
 
   hit: (other, world) ->
@@ -98,5 +104,16 @@ class Player extends Entity
 
 Player.create = (rhs) ->
   (new Player(rhs.args)).copy(rhs)
+
+class BlinkWhenInvincible
+  constructor: ->
+    @counter = 0
+  update: (world, parent) ->
+    @counter = (@counter + 1) & 0x1f
+    sprite = parent.components.sprite
+    if sprite?
+      sprite.alpha = if parent.invincible and @counter & 0x10 then 0.5 else 1.0
+
+Player.BlinkWhenInvincible = BlinkWhenInvincible
 
 module.exports = Player
