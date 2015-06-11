@@ -1,6 +1,6 @@
-Vec2 = require('./Vec2.coffee')
 Entity = require('./Entity.coffee')
-Utility = require('./Utility.coffee')
+util = require('./util.coffee')
+Vec2 = util.Vec2
 BulletEmitter = require("../scripts/patterns/BulletEmitter.coffee")
 RandomBulletEmitter = require("../scripts/patterns/RandomBulletEmitter.coffee")
 
@@ -26,7 +26,7 @@ class Servant extends Entity
     args =
       timeToLive: 666
       random: false
-    Utility.setArgs(@args, args)
+    util.setArgs(@args, args)
 
   # inherits init: (world, parent) ->
 
@@ -53,7 +53,7 @@ class Servant extends Entity
   destroy: (world, parent) ->
     @face = null
     if @components.sprite?
-      Utility.destroyDisplayObject(@components.sprite)
+      util.destroyDisplayObject(@components.sprite)
       delete @components.sprite
     super(world, parent)
     return this

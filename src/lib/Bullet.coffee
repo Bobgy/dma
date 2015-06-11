@@ -1,4 +1,5 @@
-Vec2 = require('./Vec2.coffee')
+util = require('./util')
+Vec2 = util.Vec2
 Entity = require('./Entity.coffee')
 
 class Bullet extends Entity

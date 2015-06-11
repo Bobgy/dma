@@ -1,9 +1,9 @@
+util = require("../../lib/util")
+Vec2 = util.Vec2
 Entity = require("../../lib/Entity.coffee")
-Vec2 = require("../../lib/Vec2.coffee")
 Bullet = require("../../lib/Bullet.coffee")
 Pool = require("../../lib/Pool.coffee")
 Timer = require("../../lib/Timer.coffee")
-Utility = require("../../lib/Utility.coffee")
 
 # A standard BulletEmitter class that emits n-way bullet barrage
 # Extend from this class and modify @preset, @fireMore, @copy to customize
@@ -90,7 +90,7 @@ class BulletEmitter extends Entity
         @fire(pool, @face.rotate(-delta*(i-0.5)))
 
   copy: (obj) ->
-    Utility.setArgs(@args, obj.args)
+    util.setArgs(@args, obj.args)
     @face.copy(obj.face)
     @poolID = obj.poolID
     super(obj)

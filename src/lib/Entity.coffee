@@ -1,6 +1,6 @@
-Container = require('./Container.coffee')
-Utility = require('./Utility.coffee')
-Vec2 = require('./Vec2.coffee')
+Container = require('./Container')
+util = require('./util')
+Vec2 = util.Vec2
 
 # the basic entity of a game
 # contains id, position, velocity and its components

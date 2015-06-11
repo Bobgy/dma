@@ -21,11 +21,14 @@ module.exports = (grunt) ->
         src: 'src/client.coffee'
         dest: 'js/bundle.js'
     watch:
+      files: ['src/**/*.coffee', 'server.coffee']
+      ###
       files: ['src/*.coffee',
               'src/scripts/skills/*.coffee',
               'src/scripts/*.coffee',
               'src/scripts/patterns/*.coffee',
               'src/lib/*.coffee']
+      ###
       tasks: ['browserify:dist']
   )
 

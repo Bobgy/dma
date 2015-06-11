@@ -1,9 +1,11 @@
+util = require('./util')
+
 # A base class that adds methods related to components
 class Container
   # @param id {string}
   constructor: (args, @id) ->
     @preset()
-    Utility.setArgs(@args, args) if args?
+    util.setArgs(@args, args) if args?
     @components = new Object()
     # Object.create(null) will make socket.io unable to send this object
     @cnt = 0

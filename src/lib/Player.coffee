@@ -1,4 +1,5 @@
-Vec2 = require('./Vec2.coffee')
+util = require('./util')
+Vec2 = util.Vec2
 Entity = require('./Entity.coffee')
 Servant = require('./Servant.coffee')
 SkillSummonServant = require('../scripts/skills/SummonServant.coffee')
@@ -28,7 +29,7 @@ class Player extends Entity
       keys: [  16, 65, 68, 83, 87, 191]
       r: 5 # collision radiu
       maxMana: 600
-    Utility.setArgs(@args, args)
+    util.setArgs(@args, args)
 
   # @param world {Container*}
   # @param parent {Container*}

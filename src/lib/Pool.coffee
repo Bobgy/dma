@@ -3,7 +3,7 @@
 
 Entity = require('./Entity.coffee')
 Container = require('./Container.coffee')
-Utility = require('./Utility.coffee')
+util = require('./util.coffee')
 
 class Pool extends Container
   # @param capacity {int}: the pool's capacity
@@ -69,7 +69,7 @@ class Pool extends Container
   destroy: (world, parent) ->
     @pool = null
     if @components.spritePool?
-      Utility.destroyDisplayObject(@components.spritePool)
+      util.destroyDisplayObject(@components.spritePool)
       delete @components.spritePool
     return super(world, parent)
 

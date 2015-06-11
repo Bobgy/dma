@@ -1,4 +1,5 @@
-Container = require('./Container.coffee')
+Container = require('./Container')
+util = require('./util')
 
 class Ticker extends Container
   # @param args:
@@ -15,10 +16,10 @@ class Ticker extends Container
 
   clone: -> (new Ticker(args)).copy(this)
 
-  copy: (rhs) ->
-    super(rhs)
-    @tick = rhs.tick
-    @valid = rhs.valid
+  copy: (obj) ->
+    super(obj)
+    @tick = obj.tick
+    @valid = obj.valid
     return this
 
 class Timer extends Ticker
@@ -39,7 +40,7 @@ class Timer extends Ticker
     args =
       interval: 0
       periodic: true
-    Utility.setArgs(@args, args)
+    util.setArgs(@args, args)
   update: (world, parent) ->
     return this unless @valid
     super(world, parent)
@@ -51,8 +52,9 @@ class Timer extends Ticker
         delete parent.components[@id]
       @callback.call(parent, world)
     return this
-  copy: (rhs) ->
-    super(rhs)
+  copy: (obj) ->
+    super(obj)
+    @valid = obj.valid
     @callback = rhs.callback unless @callback?
     return this
   clone: -> new Timer(@args, @id, @currentTick, @callback)

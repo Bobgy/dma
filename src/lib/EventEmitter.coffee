@@ -6,13 +6,21 @@ class EventEmitter
     @listeners = new Object()
     @copyable = true
 
-  # @return {int}: the index of pushed event
+  # @param name {string}
+  # @param tick {int}: the tick this event happened / will happen
+  # @param args {Array}: the other arguments
   pushEvent: (name, tick, args...) ->
-    return @list.push(new Event(name, tick, args)) - 1
+    @list.push(new Event(name, tick, args))
+    return this
+
+  # @param name {string}
+  # @param callback {function}
   on: (name, callback) ->
     @listeners[name] = [] unless @listeners[name]?
     @listeners[name].push(callback)
     return this
+
+  # @param world {World}
   earlyUpdate: (world) ->
     delList = []
     for id, event of @list
@@ -25,13 +33,17 @@ class EventEmitter
     for id in delList
       @list.splice(delList, 1)
     return this
+
   clearEvent: ->
     @list = []
     return this
+
   destroy: ->
     @list = null
     @listeners = null
     return this
+
+  # @param tick {int}: only events with tick greater than this will be copied
   copy: (obj, tick=-1) ->
     for event in obj.list
       @list.push(event) if event.tick > tick
@@ -41,16 +53,23 @@ class EventEmitter
 class Event
   constructor: (@name, @tick, @args) ->
 
+# a event emitter with a fixed pool size, new events will replace old ones
 class FixedsizeEventEmitter extends EventEmitter
-  constructor: (@maxSize) ->
+  # @param capacity {int}: the capacity of this event emitter
+  constructor: (@capacity) ->
     super()
     @last = -1
+
+  # @param name {string}
+  # @param tick {int}
+  # @param args {Object}
   pushEvent: (name, tick, args...) ->
-    if @list.length == @maxSize
+    if @list.length == @capacity
       @last = if @last + 1 == @maxSize then 0 else @last + 1
       @list[@last] = new Event(name, tick, args)
     else
-      @last = super()
-    return @last
+      super()
+      @last = @list.length - 1
+    return this
 
 module.exports = [EventEmitter, FixedsizeEventEmitter]

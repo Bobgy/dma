@@ -1,4 +1,5 @@
-Vec2 = require('../../lib/Vec2.coffee')
+util = require('../../lib/util')
+Vec2 = util.Vec2
 Skill = require('../../lib/Skill.coffee')
 Servant = require('../../lib/Servant.coffee')
 

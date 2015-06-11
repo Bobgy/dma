@@ -1,11 +1,11 @@
-Vec2 = require('./Vec2.coffee')
 Entity = require('./Entity.coffee')
 Bullet = require('./Bullet.coffee')
 Pool = require('./Pool.coffee')
 Servant = require('./Servant.coffee')
 Player = require('./Player.coffee')
 Container = require('./Container.coffee')
-Utility = require('./Utility.coffee')
+util = require('./util.coffee')
+Vec2 = util.Vec2
 
 [EventEmitter, FixedsizeEventEmitter] = require('./EventEmitter.coffee')
 
@@ -24,7 +24,7 @@ class World extends Container
     @players = []
     @insert(new Container(null, 'pools'), this)
     @insert(new Container(null, 'enemies'), this)
-    @insert(new Utility.FPSLogger(@verbose, 'Logger_' + id), this) if @verbose
+    @insert(new util.FPSLogger(@verbose, 'Logger_' + id), this) if @verbose
     @insert(new EventEmitter('eventEmitter'), this)
     @components.eventEmitter.on('key', @keyAction)
     @components.eventEmitter.on('sync', @sync)

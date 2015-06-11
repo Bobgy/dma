@@ -1,5 +1,6 @@
+util = require('../../lib/util')
+Vec2 = util.Vec2
 BulletEmitter = require('./BulletEmitter.coffee')
-Vec2 = require('../../lib/Vec2.coffee')
 XOR128 = require('../../../js/xor128.js')
 
 class RandomBulletEmitter extends BulletEmitter

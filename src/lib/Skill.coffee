@@ -1,4 +1,5 @@
 Container = require('./Container.coffee')
+util = require('./util.coffee')
 
 # Skill is a base component class used to describe a player's skill.
 # A skill has a cooldown which is the required time before reusing the skill.
@@ -37,7 +38,7 @@ class Skill extends Container
       coolDown: 120
       manaCost: 240
       initTime: 120
-    Utility.setArgs(@args, args)
+    util.setArgs(@args, args)
 
   cast: (world, parent) ->
     # do nothing, overide this function to add a new skill

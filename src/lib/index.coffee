@@ -1,5 +1,4 @@
 module.exports =
-  AccurateInterval: require('./AccurateInterval.coffee')
   Bullet:           require('./Bullet.coffee')
   Container:        require('./Container.coffee')
   Entity:           require('./Entity.coffee')
@@ -8,9 +7,8 @@ module.exports =
   Servant:          require('./Servant.coffee')
   Skill:            require('./Skill.coffee')
   Timer:            require('./Timer.coffee')
-  Utility:          require('./Utility.coffee')
-  Vec2:             require('./Vec2.coffee')
-  World:            require('./World.coffee')
+  util:            require('./util.coffee')
+  World:            require('./World')
 
 [EventEmitter, FixedsizeEventEmitter] = require('./EventEmitter.coffee')
 module.exports.EventEmitter = EventEmitter

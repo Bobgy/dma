@@ -1,6 +1,6 @@
 Core = require('./lib/index')
 for id, mod of Core
-  eval("#{id}=Core.#{id}")
+  this[id] = mod
 Loader = require('./AssetsLoader.coffee')
 Game = require('./Game.coffee')
 
@@ -13,7 +13,7 @@ loader = new Loader(game, ->
   console.log('Assets are loaded.')
   @game.assets = @loader.resources
 
-  history = new FixedsizeEventEmitter(16)
+  history = new Core.FixedsizeEventEmitter(16)
   document.body.appendChild(game.renderer.view)
 
   keys = [87, 65, 83, 68, 16, 191]

@@ -1,6 +1,8 @@
-Container = require('./lib/Container.coffee')
-World = require('./lib/World.coffee')
-AccurateInterval = require('./lib/AccurateInterval.coffee')
+Container = require('./lib/Container')
+World = require('./lib/World')
+Core = require('./lib')
+util = Core.util
+
 SkillSummonServant = require('./scripts/skills/SummonServant.coffee')
 class Game extends Container
   # @param id {string/integer}
@@ -27,7 +29,7 @@ class Game extends Container
     args =
       w: 1024
       h: 640
-    Utility.setArgs(@args, args)
+    util.setArgs(@args, args)
 
   update: =>
     @worlds[i].earlyUpdate(@worlds[i], @worlds[i^1]) for i in [0..1]
@@ -53,6 +55,6 @@ class Game extends Container
   # @param interval {float}: the frame interval you intend the game to run with
   # @param isFPSon {boolean}: whether logging current FPS in game
   start: (interval=15) ->
-    @process = new AccurateInterval(@update, interval)
+    @process = new util.AccurateInterval(@update, interval)
 
 module.exports = Game

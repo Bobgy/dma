@@ -5,12 +5,11 @@ http = require('http').Server(app)
 io = require('socket.io')(http)
 
 Core = require('./src/lib')
-for id, mod of Core
-  console.log("imported #{id}")
-  eval("#{id}=mod")
-Game = require('./src/Game.coffee')
+util = Core.util
+Vec2 = util.Vec2
+Game = require('./src/Game')
 
-SkillSummonServant = require('./src/scripts/skills/SummonServant.coffee')
+SkillSummonServant = require('./src/scripts/skills/SummonServant')
 
 game = new Game(null, 'server')
 game.io = io
@@ -43,7 +42,7 @@ io.on('connection', (socket) ->
   if userID < 2
     pos = new Vec2(300, if userID then 500 else 100)
     face = new Vec2(0, if userID then -1 else 1)
-    player = new Player(null, userID, pos, new Vec2(), face)
+    player = new Core.Player(null, userID, pos, new Vec2(), face)
     player.components.skill = new SkillSummonServant(null, 'skill')
     game.worlds[userID].addPlayer(player)
 
