@@ -1,7 +1,7 @@
-Container = require('./Container.coffee')
-World = require('./World.coffee')
-AccurateInterval = require('./AccurateInterval.coffee')
-SkillSummonServant = require('../scripts/skills/SummonServant.coffee')
+Container = require('./lib/Container.coffee')
+World = require('./lib/World.coffee')
+AccurateInterval = require('./lib/AccurateInterval.coffee')
+SkillSummonServant = require('./scripts/skills/SummonServant.coffee')
 class Game extends Container
   # @param id {string/integer}
   # @param PIXI {module}

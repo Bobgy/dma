@@ -14,6 +14,8 @@ class Entity extends Container
     @valid = true
     @type = 'Entity'
 
+  # @param world {World}
+  # @param parent {Container*}
   init: (world, parent) ->
     if not @components.sprite?
       PIXI = world.game.PIXI
@@ -30,8 +32,6 @@ class Entity extends Container
     super(world, parent)
     return this
 
-  # @param world {Container*}
-  # @param parent {Container*}
   update: (world, parent) ->
     return this unless @valid
     @pos.set(@pos.x + @v.x, @pos.y + @v.y)

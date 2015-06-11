@@ -3,7 +3,6 @@ module.exports =
   Bullet:           require('./Bullet.coffee')
   Container:        require('./Container.coffee')
   Entity:           require('./Entity.coffee')
-  Game:             require('./Game.coffee')
   Player:           require('./Player.coffee')
   Pool:             require('./Pool.coffee')
   Servant:          require('./Servant.coffee')

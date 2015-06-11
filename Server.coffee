@@ -4,10 +4,11 @@ app = express()
 http = require('http').Server(app)
 io = require('socket.io')(http)
 
-Core = require('./src/lib/Core.coffee')
+Core = require('./src/lib')
 for id, mod of Core
   console.log("imported #{id}")
   eval("#{id}=mod")
+Game = require('./src/Game.coffee')
 
 SkillSummonServant = require('./src/scripts/skills/SummonServant.coffee')
 

@@ -5,8 +5,19 @@ module.exports = (grunt) ->
       grunt.file.readJSON('package.json')
     coffeeify:
       options:
+        browserifyOptions:
+          extensions: ['.coffee']
         debug: true
       game:
+        src: 'src/client.coffee'
+        dest: 'js/bundle.js'
+    browserify:
+      options:
+        browserifyOptions:
+          extensions: ['.coffee']
+        debug: true
+        transform: ['coffeeify']
+      dist:
         src: 'src/client.coffee'
         dest: 'js/bundle.js'
     watch:
@@ -15,7 +26,7 @@ module.exports = (grunt) ->
               'src/scripts/*.coffee',
               'src/scripts/patterns/*.coffee',
               'src/lib/*.coffee']
-      tasks: ['coffeeify']
+      tasks: ['browserify:dist']
   )
 
   grunt.loadNpmTasks('grunt-contrib-coffee')
@@ -24,4 +35,4 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks('grunt-coffeeify')
 
   # Default task(s).
-  grunt.registerTask('default', ['coffeeify'])
+  grunt.registerTask('default', ['browserify:dist'])

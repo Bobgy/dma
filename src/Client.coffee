@@ -1,7 +1,8 @@
-Core = require('./lib/Core.coffee')
+Core = require('./lib/index')
 for id, mod of Core
   eval("#{id}=Core.#{id}")
 Loader = require('./AssetsLoader.coffee')
+Game = require('./Game.coffee')
 
 game = new Game(null, 'client', PIXI)
 id = -1
