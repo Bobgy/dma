@@ -55,6 +55,9 @@ class Entity extends Container
   destroy: (world, parent) ->
     @pos = null
     @v = null
+    if @components.sprite?
+      util.destroyDisplayObject(@components.sprite)
+      delete @components.sprite
     return super(world, parent)
 
   # init sprite for this entity using texture

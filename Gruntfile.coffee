@@ -15,7 +15,7 @@ module.exports = (grunt) ->
       options:
         browserifyOptions:
           extensions: ['.coffee']
-        debug: true
+          debug: true
         transform: ['coffeeify']
       dist:
         src: 'src/client.coffee'

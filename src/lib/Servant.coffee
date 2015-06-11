@@ -52,9 +52,6 @@ class Servant extends Entity
   # @param world {World}
   destroy: (world, parent) ->
     @face = null
-    if @components.sprite?
-      util.destroyDisplayObject(@components.sprite)
-      delete @components.sprite
     super(world, parent)
     return this
 

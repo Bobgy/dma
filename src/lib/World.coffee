@@ -1,3 +1,5 @@
+"use strict"
+
 Entity = require('./Entity.coffee')
 Bullet = require('./Bullet.coffee')
 Pool = require('./Pool.coffee')
@@ -26,8 +28,11 @@ class World extends Container
     @insert(new Container(null, 'enemies'), this)
     @insert(new util.FPSLogger(@verbose, 'Logger_' + id), this) if @verbose
     @insert(new EventEmitter('eventEmitter'), this)
-    @components.eventEmitter.on('key', @keyAction)
-    @components.eventEmitter.on('sync', @sync)
+    @components.eventEmitter
+      .on('key', @keyAction)
+      .on('sync', @sync)
+      .on('syncPlayer', @syncPlayer)
+
     @tick = 0
 
     @game = null
@@ -95,6 +100,13 @@ class World extends Container
 
     @components.eventEmitter.clearEvent().copy(eventEmitter) if eventEmitter?
     return this
+
+  syncPlayer: (players) ->
+    for player in @players
+      player.destroy(this)
+    @players = []
+    for player in players
+      @importEntity(@players, player)
 
   copy: (obj) ->
     super(obj)

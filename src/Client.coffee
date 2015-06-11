@@ -24,6 +24,11 @@ loader = new Loader(game, ->
     karr[key] = false
 
   verbose = false
+  socket.on('syncPlayer', (worldID, tick, players) ->
+    world = game.worlds[worldID]
+    world.get('eventEmitter')
+      .pushEvent('syncPlayer', tick, players)
+  )
   socket.on('sync', (worldID, tick, players, enemies, eventEmitter, pools) ->
     world = game.worlds[worldID]
     oldTick = world.tick

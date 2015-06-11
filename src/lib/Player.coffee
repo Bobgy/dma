@@ -1,9 +1,8 @@
 util = require('./util')
 Vec2 = util.Vec2
-Entity = require('./Entity.coffee')
-Servant = require('./Servant.coffee')
-SkillSummonServant = require('../scripts/skills/SummonServant.coffee')
-Timer = require('./Timer.coffee')
+Entity = require('./Entity')
+Servant = require('./Servant')
+Timer = require('./Timer')
 
 # a basic player
 class Player extends Entity
@@ -82,28 +81,28 @@ class Player extends Entity
     @components.sprite?.visible = true
     return this
 
-  # @param rhs {Player}
-  copy: (rhs) ->
-    super(rhs)
-    @keyState = rhs.keyState
-    @face = rhs.face
-    @mana = rhs.mana
-    @invincible = rhs.invincible
+  # @param obj {Player}
+  copy: (obj) ->
+    super(obj)
+    @keyState = obj.keyState
+    @face = obj.face
+    @mana = obj.mana
+    @invincible = obj.invincible
     return this
 
   destroy: (world, parent) ->
     @face = null
-    @keyState.splice(0, keyState.length)
+    @keyState.splice(0, @keyState.length)
     @keyState = null
     return super(world, parent)
 
-  # @param rhs {bullet}
+  # @param obj {bullet}
   # @return {bool}
-  testCollision: (rhs) ->
-    return rhs.valid && (@pos.sub(rhs.pos)).length() <= rhs.r
+  testCollision: (obj) ->
+    return obj.valid && (@pos.sub(obj.pos)).length() <= obj.r
 
-Player.create = (rhs) ->
-  (new Player(rhs.args)).copy(rhs)
+Player.create = (obj) ->
+  (new Player(obj.args)).copy(obj)
 
 class BlinkWhenInvincible
   constructor: ->

@@ -77,7 +77,7 @@ class Container
     for id, component of @components
       component.destroy?(world, this)
     @components = null
-    parent.remove(@id) if parent?
+    parent.remove(@id) if parent? and parent.remove?
     return this
 
   get: (id) ->
