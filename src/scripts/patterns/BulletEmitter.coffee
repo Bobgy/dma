@@ -26,9 +26,9 @@ class BulletEmitter extends Entity
       interval: 33
       waitTime: 66
       homing: true
-      nWay: 5
+      nWay: 3
       deltaAngle: 15
-      poolSize: 64
+      poolSize: 40
     return this
 
   init: (world, parent) ->

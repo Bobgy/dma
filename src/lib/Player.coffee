@@ -27,7 +27,7 @@ class Player extends Entity
       #     Shift,  A,  D,  S,  W,   /
       keys: [  16, 65, 68, 83, 87, 191]
       r: 5 # collision radiu
-      maxMana: 900
+      maxMana: 540
     util.setArgs(@args, args)
 
   init: (world, parent) ->

@@ -18,7 +18,7 @@ module.exports = (grunt) ->
           debug: true
         transform: ['coffeeify']
       dist:
-        src: 'src/client.coffee'
+        src: 'src/Client.coffee'
         dest: 'js/bundle.js'
     watch:
       files: ['src/**/*.coffee', 'server.coffee']
