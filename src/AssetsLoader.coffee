@@ -5,7 +5,7 @@ class AssetsLoader
     @loader.add('Bullet0', 'assets/bullet0.png')
       .add('Bullet1', 'assets/bullet1.png')
       .add('Servant', 'assets/servant.png')
-      .add('Player', 'assets/bunny.png')
+      .add('Player', 'assets/character_back.png')
     fn = fn.bind(this)
     @loader.once('complete', fn)
   load: -> @loader.load()

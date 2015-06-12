@@ -16,12 +16,12 @@ class RandomBulletEmitter extends BulletEmitter
   preset: ->
     @args =
       bulletSpeed: 4
-      interval: 5
+      interval: 8
       waitTime: 66
       homing: true
       rangeAngle: 120
       poolSize: 64
-      seed: [1324, 253525, 31111, 124]
+      seed: [13241201, 21235525, 12331111, 31124]
     return this
 
   fireMore: (world) ->

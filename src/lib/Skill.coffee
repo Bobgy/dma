@@ -36,7 +36,7 @@ class Skill extends Container
     super()
     args =
       coolDown: 120
-      manaCost: 240
+      manaCost: 300
       initTime: 120
     util.setArgs(@args, args)
 
