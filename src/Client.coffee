@@ -29,44 +29,49 @@ loader = new Loader(game, ->
     world.get('eventEmitter')
       .pushEvent('syncPlayer', tick, players)
   )
+
   socket.on('sync', (worldID, tick, players, enemies, eventEmitter, pools) ->
     world = game.worlds[worldID]
     oldTick = world.tick
 
     # Verbose
-    if verbose and world.id is id
+    if world.id is id
       oldPos = world.players[0].pos.clone() if world.players[0]?
     # End
 
     world.sync(tick, players, enemies, eventEmitter, pools)
-    if world.id is id
-      delta = oldTick - tick
-      unless 1 < delta < 10
-        console.log('sync, server:', tick, 'client:',
-                    oldTick, 'delta:', oldTick-tick)
-      world.components.eventEmitter.copy(history, tick)
-      if tick+1 < oldTick < tick+10
-        while world.tick < oldTick
-          world.earlyUpdate(game.worlds[worldID^1])
-          world.update(game.worlds[worldID^1])
-      else
-        console.log('Synchronizing...')
-        for i in [1..8]
-          world.earlyUpdate(game.worlds[worldID^1])
-          world.update(game.worlds[worldID^1])
 
-      # Verbose
-      if oldPos?
-        newPos = world.players[0].pos.clone()
-        console.log(newPos.sub(oldPos))
-      # End
+    world.components.eventEmitter.copy(history, tick)
+    if tick+1 < oldTick < tick+10
+      while world.tick < oldTick
+        world.earlyUpdate(game.worlds[worldID^1])
+        world.update(game.worlds[worldID^1])
+    else
+      console.warn('Sync, server:', tick, 'client:',
+                  oldTick, 'delta:', oldTick-tick)
+      for i in [1..8]
+        world.earlyUpdate(game.worlds[worldID^1])
+        world.update(game.worlds[worldID^1])
+
+    # Verbose
+    if oldPos?
+      newPos = world.players[0].pos.clone()
+      unless newPos.x == oldPos.x and newPos.y == oldPos.y
+        console.warn('Delta:', newPos.sub(oldPos))
+    # End
   )
+
   socket.on('key', (user_id, msg, isDown, tick) ->
     console.log(user_id, 'key', msg, 'send', tick, ', rec',
                 game.worlds[user_id].tick)
     game.worlds[user_id].components.eventEmitter.
          pushEvent('key', tick, 0, isDown, msg)
   )
+
+  socket.on('score', (score) ->
+    game.score = score
+  )
+
   socket.on('Servant', (tick, worldID, servant) ->
     game.worlds[worldID].components.eventEmitter.
          pushEvent('Servant', tick, tick, servant)

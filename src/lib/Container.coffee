@@ -51,8 +51,8 @@ class Container
   # deep copy this
   # @return {Container}: the cloned container
   clone: ->
-    container = new Container(null, @id)
-    return container.copyComponents(this)
+    container = new Container(@args, @id)
+    return container.copy(this)
 
   # copy components from obj
   # components with property copyable will be copied
@@ -71,11 +71,11 @@ class Container
 
   # destroys this container and its components
   # only Objects need to be destroyed
-  # @param world {World}
+  # @param root {Container*}
   # @param parent {Container*}
-  destroy: (world, parent) ->
+  destroy: (root, parent) ->
     for id, component of @components
-      component.destroy?(world, this)
+      component.destroy?(root, this)
     @components = null
     parent.remove(@id) if parent? and parent.remove?
     return this

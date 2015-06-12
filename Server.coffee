@@ -25,6 +25,7 @@ movementKeys = keys.slice(0, 5)
 
 game.start(15, false)
 synchronize = () ->
+  io.emit('score', game.score)
   for world in game.worlds
     io.emit('sync', world.id, world.tick, world.players,
             world.get('enemies'), world.get('eventEmitter'),
@@ -57,7 +58,7 @@ io.on('connection', (socket) ->
         socket.broadcast.emit('key', userID, keyCode, isDown, tick)
       world = game.worlds[userID]
       if tick <= world.tick
-        console.log('Warning:', user, 'key', keyCode,
+        console.warn('Warning:', user, 'key', keyCode,
                     'send', tick, ', rec', world.tick)
       game.worlds[userID].components.eventEmitter.pushEvent(
         'key', tick, 0, isDown, keyCode
