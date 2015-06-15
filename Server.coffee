@@ -30,7 +30,7 @@ synchronize = () ->
     io.emit('sync', world.id, world.tick, world.players,
             world.get('enemies'), world.get('eventEmitter'),
             world.get('pools'))
-setInterval(synchronize, 1000)
+setInterval(synchronize, 2000)
 
 syncPlayer = ->
   for world in game.worlds

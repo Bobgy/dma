@@ -1,15 +1,15 @@
 "use strict"
 
-Entity = require('./Entity.coffee')
-Bullet = require('./Bullet.coffee')
-Pool = require('./Pool.coffee')
-Servant = require('./Servant.coffee')
-Player = require('./Player.coffee')
-Container = require('./Container.coffee')
-util = require('./util.coffee')
+Entity = require('./Entity')
+Bullet = require('./Bullet')
+Pool = require('./Pool')
+Servant = require('./Servant')
+Player = require('./Player')
+Container = require('./Container')
+util = require('./util')
 Vec2 = util.Vec2
 
-[EventEmitter, FixedsizeEventEmitter] = require('./EventEmitter.coffee')
+EventEmitter = require('./EventEmitter')
 
 EntityFactory = (type, entity) -> type.create(entity)
 

@@ -1,8 +1,10 @@
+"use strict"
+
 Core = require('./lib/index')
 for id, mod of Core
   this[id] = mod
-Loader = require('./AssetsLoader.coffee')
-Game = require('./Game.coffee')
+Loader = require('./AssetsLoader')
+Game = require('./Game')
 
 game = new Game(null, 'client', PIXI)
 id = -1
@@ -13,7 +15,7 @@ loader = new Loader(game, ->
   console.log('Assets are loaded.')
   @game.assets = @loader.resources
 
-  history = new Core.FixedsizeEventEmitter(16)
+  history = new Core.EventEmitter.FixedsizeEventEmitter(16)
   document.body.appendChild(game.renderer.view)
 
   keys = [87, 65, 83, 68, 16, 191]
@@ -31,6 +33,7 @@ loader = new Loader(game, ->
   )
 
   socket.on('sync', (worldID, tick, players, enemies, eventEmitter, pools) ->
+    console.log("[#{tick}] sync #{worldID}")
     world = game.worlds[worldID]
     oldTick = world.tick
 
@@ -41,7 +44,7 @@ loader = new Loader(game, ->
 
     world.sync(tick, players, enemies, eventEmitter, pools)
 
-    world.components.eventEmitter.copy(history, tick)
+    world.components.eventEmitter.copy(history, tick) if world.id is id
     if tick+1 < oldTick < tick+10
       while world.tick < oldTick
         world.earlyUpdate(game.worlds[worldID^1])
@@ -87,6 +90,7 @@ loader = new Loader(game, ->
           if world.keyAction(0, isDown, keyCode)
             history.pushEvent('key', world.tick + 1, 0, isDown, keyCode)
             socket.emit('key', keyCode, isDown, world.tick + 1)
+            console.log("[#{world.tick+1}] #{keyCode} #{isDown}");
   document.onkeydown = onKey.bind(null, true)
   document.onkeyup = onKey.bind(null, false)
 

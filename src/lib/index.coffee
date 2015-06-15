@@ -1,15 +1,12 @@
 module.exports =
-  Bullet:           require('./Bullet.coffee')
-  Container:        require('./Container.coffee')
-  Entity:           require('./Entity.coffee')
-  Player:           require('./Player.coffee')
-  Pool:             require('./Pool.coffee')
-  Servant:          require('./Servant.coffee')
-  Skill:            require('./Skill.coffee')
-  Timer:            require('./Timer.coffee')
-  util:            require('./util.coffee')
+  Bullet:           require('./Bullet')
+  Container:        require('./Container')
+  Entity:           require('./Entity')
+  Player:           require('./Player')
+  Pool:             require('./Pool')
+  Servant:          require('./Servant')
+  Skill:            require('./Skill')
+  Timer:            require('./Timer')
+  util:             require('./util')
   World:            require('./World')
-
-[EventEmitter, FixedsizeEventEmitter] = require('./EventEmitter.coffee')
-module.exports.EventEmitter = EventEmitter
-module.exports.FixedsizeEventEmitter = FixedsizeEventEmitter
+  EventEmitter:     require('./EventEmitter')

@@ -1,3 +1,5 @@
+"use strict"
+
 # EventEmitter contains events
 # Events should have (name, tick, args...)
 class EventEmitter
@@ -64,12 +66,15 @@ class FixedsizeEventEmitter extends EventEmitter
   # @param tick {int}
   # @param args {Object}
   pushEvent: (name, tick, args...) ->
+    console.assert(@list.length <= @capacity)
     if @list.length == @capacity
-      @last = if @last + 1 == @maxSize then 0 else @last + 1
+      @last = if @last + 1 == @capacity then 0 else @last + 1
       @list[@last] = new Event(name, tick, args)
     else
       super()
       @last = @list.length - 1
     return this
 
-module.exports = [EventEmitter, FixedsizeEventEmitter]
+EventEmitter.FixedsizeEventEmitter = FixedsizeEventEmitter;
+
+module.exports = EventEmitter
