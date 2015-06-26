@@ -17,9 +17,12 @@ module.exports = (grunt) ->
           extensions: ['.coffee']
           debug: true
         transform: ['coffeeify']
-      dist:
+      client:
         src: 'src/Client.coffee'
-        dest: 'js/bundle.js'
+        dest: 'js/client.js'
+      server:
+        src: 'src/Server.coffee'
+        dest: 'js/server.js'
     watch:
       files: ['src/**/*.coffee', 'server.coffee']
       ###
@@ -29,7 +32,7 @@ module.exports = (grunt) ->
               'src/scripts/patterns/*.coffee',
               'src/lib/*.coffee']
       ###
-      tasks: ['browserify:dist']
+      tasks: ['browserify']
   )
 
   grunt.loadNpmTasks('grunt-contrib-coffee')
@@ -38,4 +41,4 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks('grunt-coffeeify')
 
   # Default task(s).
-  grunt.registerTask('default', ['browserify:dist'])
+  grunt.registerTask('default', ['browserify'])

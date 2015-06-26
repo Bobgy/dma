@@ -28,7 +28,7 @@ class Game extends Container
       @insert(new gui.ScoreBoard(null, 'ScoreBoard', @PIXI), this)
 
     # stores socket.io handle, should be added later
-    @io = null
+    sockets = null
 
     # init
     SkillSummonServant.init(@worlds[i]) for i in [0..1]
@@ -58,6 +58,14 @@ class Game extends Container
     @stage.addChild(@get('ScoreBoard').stage)
     @renderer.render(@stage)
     return
+
+  initPlayers: ->
+    for user in [0..1]
+      pos = new Vec2(400, if user then 500 else 100)
+      face = new Vec2(0, if user then -1 else 1)
+      player = new Core.Player(null, user, pos, new Vec2(), face)
+      player.insert(new SkillSummonServant(null, 'skill'))
+      @worlds[user].addPlayer(player)
 
   # get a world with its id
   # @param id {integer}
