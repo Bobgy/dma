@@ -1,7 +1,7 @@
 {
-  "name": "geo-war",
+  "name": "danmaku.arena",
   "version": "0.0.1",
-  "description": "Two-player competitive shoot-em-all type game",
+  "description": "DanMaku Arena",
   "dependencies": {
     "coffeeify": "^1.1.0",
     "express": "^4.12.3",
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Bobgy/geo_war.git"
+    "url": "https://github.com/Bobgy/dma.git"
   },
   "keywords": [
     "stg",
@@ -31,9 +31,12 @@
     "pixi.js"
   ],
   "author": "Bobgy",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Bobgy/geo_war/issues"
+    "url": "https://github.com/Bobgy/dma/issues"
   },
-  "homepage": "https://github.com/Bobgy/geo_war"
+  "homepage": "https://github.com/Bobgy/dma",
+  "bin": {
+    "danmaku.arena": "www.js"
+  }
 }

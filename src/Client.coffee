@@ -9,7 +9,14 @@ Game = require('./Game')
 game = new Game(null, 'client', PIXI)
 id = 1000
 socket = io()
-userID = Math.floor(Math.random()*10000).toString()
+getCookie = (sKey) ->
+  if (!sKey) then return null
+  return decodeURIComponent(
+    document.cookie.replace(
+      new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1"
+    )
+  ) || null
+userID = getCookie('user_id') || Math.floor(Math.random()*10000).toString()
 socket.emit('user_id', userID)
 socket.emit('match')
 
