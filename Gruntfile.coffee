@@ -3,6 +3,15 @@ module.exports = (grunt) ->
   grunt.initConfig(
     pkg:
       grunt.file.readJSON('package.json')
+    coffee:
+      options:
+        sourceMap: true
+      compile:
+        expand: true
+        ext: '.js'
+        cwd: 'src/'
+        src: '**/*.coffee'
+        dest: 'lib/'
     coffeeify:
       options:
         browserifyOptions:
@@ -20,19 +29,9 @@ module.exports = (grunt) ->
       client:
         src: 'src/Client.coffee'
         dest: 'js/client.js'
-      server:
-        src: 'src/Server.coffee'
-        dest: 'js/server.js'
     watch:
-      files: ['src/**/*.coffee', 'server.coffee']
-      ###
-      files: ['src/*.coffee',
-              'src/scripts/skills/*.coffee',
-              'src/scripts/*.coffee',
-              'src/scripts/patterns/*.coffee',
-              'src/lib/*.coffee']
-      ###
-      tasks: ['browserify']
+      files: ['src/**/*.coffee']
+      tasks: ['coffee', 'browserify']
   )
 
   grunt.loadNpmTasks('grunt-contrib-coffee')
@@ -41,4 +40,4 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks('grunt-coffeeify')
 
   # Default task(s).
-  grunt.registerTask('default', ['browserify'])
+  grunt.registerTask('default', ['coffee', 'browserify'])

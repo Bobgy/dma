@@ -8,8 +8,7 @@ test.js
 # Generated javascript files
 js/*.js
 js/*.js.map
-server.js
-server.js.map
+lib/*
 
 # Logs
 logs

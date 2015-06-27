@@ -1,8 +1,8 @@
-Entity = require('./Entity.coffee')
-util = require('./util.coffee')
+Entity = require('./Entity')
+util = require('./util')
 Vec2 = util.Vec2
-BulletEmitter = require("../scripts/patterns/BulletEmitter.coffee")
-RandomBulletEmitter = require("../scripts/patterns/RandomBulletEmitter.coffee")
+BulletEmitter = require("../scripts/patterns/BulletEmitter")
+RandomBulletEmitter = require("../scripts/patterns/RandomBulletEmitter")
 
 class Servant extends Entity
   # @param pos {Vec2}

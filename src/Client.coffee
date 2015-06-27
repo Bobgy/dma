@@ -1,15 +1,19 @@
 "use strict"
 
-Core = require('./lib/index')
+Core = require('./core/index')
 for id, mod of Core
   this[id] = mod
 Loader = require('./AssetsLoader')
 Game = require('./Game')
 
 game = new Game(null, 'client', PIXI)
-id = -1
+id = 1000
 socket = io()
-socket.on('userID', (msg) -> id = parseInt(msg) )
+userID = Math.floor(Math.random()*10000).toString()
+socket.emit('user_id', userID)
+socket.emit('match')
+
+# socket.on('userID', (msg) -> id = parseInt(msg))
 
 loader = new Loader(game, ->
   console.log('Assets are loaded.')
@@ -31,6 +35,8 @@ loader = new Loader(game, ->
     world.get('eventEmitter')
       .pushEvent('syncPlayer', tick, players)
   )
+
+  socket.on('id', (_id) -> id = _id)
 
   socket.on('sync', (worldID, tick, players, enemies, eventEmitter, pools) ->
     console.log("[#{tick}] sync #{worldID}")

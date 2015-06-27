@@ -1,6 +1,6 @@
 util = require('./util')
 Vec2 = util.Vec2
-Entity = require('./Entity.coffee')
+Entity = require('./Entity')
 
 class Bullet extends Entity
   # @param id {string}

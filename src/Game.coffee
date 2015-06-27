@@ -1,7 +1,8 @@
-Core = require('./lib')
+Core = require('./core')
 util = Core.util
 Container = Core.Container
 World = Core.World
+Vec2 = util.Vec2
 
 gui = require('./ui/gui')
 

@@ -1,6 +1,6 @@
 "use strict"
 
-Core = require('../lib')
+Core = require('../core')
 
 class GUI extends Core.Container
   # @param args {Object}

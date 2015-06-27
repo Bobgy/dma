@@ -1,4 +1,4 @@
-Core = require('./lib')
+Core = require('./core')
 Game = require('./Game')
 util = Core.util
 Vec2 = util.Vec2
@@ -23,17 +23,22 @@ class GameServer
     return @users[@index(id) ^ 1]
 
   start: (interval=15) ->
-    synchronize = () ->
-      io.emit('score', @game.score)
-      for world in @game.worlds
-        for user in @users
-          socket = @sockets[user]
-          if socket?
+    for user, id in @users
+      socket = @sockets[user]
+      if socket?
+        socket.emit('id', id)
+    synchronize = () =>
+      for user, id in @users
+        socket = @sockets[user]
+        if socket?
+          socket.emit('id', id)
+          socket.emit('score', @game.score)
+          for world in @game.worlds
             socket.emit('sync', world.id, world.tick, world.players,
                   world.get('enemies'), world.get('eventEmitter'),
                   world.get('pools'))
     @syncProcess = setInterval(synchronize, 2000)
-    syncPlayer = ->
+    syncPlayer = =>
       for world in game.worlds
         id = world.id
         if sockets[id^1]?
@@ -57,7 +62,7 @@ class Server
     sockets = @sockets
     games = @games
     waitList = @waitList
-    io.on('connection', (socket) ->
+    @io.on('connection', (socket) ->
       state = 0 # waiting for user_id
       userID = null
       socket.on('user_id', (user_id) ->
@@ -111,7 +116,8 @@ class Server
             sockets[gameServer.other(userID)].emit(
               'key', userID, keyCode, isDown, tick
             )
-          world = gameServer.game.worlds[game.index(userID)]
+          game = gameServer.game
+          world = game.worlds[game.index(userID)]
           if tick <= world.tick
             console.warn('Warning:', userID, 'key', keyCode,
                         'send', tick, ', rec', world.tick)
@@ -123,5 +129,6 @@ class Server
 
       console.log('Someone connected')
     )
+    return
 
 module.exports = Server

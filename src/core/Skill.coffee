@@ -1,5 +1,5 @@
-Container = require('./Container.coffee')
-util = require('./util.coffee')
+Container = require('./Container')
+util = require('./util')
 
 # Skill is a base component class used to describe a player's skill.
 # A skill has a cooldown which is the required time before reusing the skill.

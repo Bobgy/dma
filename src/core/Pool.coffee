@@ -1,9 +1,9 @@
 # A fixed pool containing Entities of the same type
 # TODO: use a queue to store the empty slots
 
-Entity = require('./Entity.coffee')
-Container = require('./Container.coffee')
-util = require('./util.coffee')
+Entity = require('./Entity')
+Container = require('./Container')
+util = require('./util')
 
 class Pool extends Container
   # @param capacity {int}: the pool's capacity

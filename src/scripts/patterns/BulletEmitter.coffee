@@ -1,9 +1,9 @@
-util = require("../../lib/util")
+util = require("../../core/util")
 Vec2 = util.Vec2
-Entity = require("../../lib/Entity.coffee")
-Bullet = require("../../lib/Bullet.coffee")
-Pool = require("../../lib/Pool.coffee")
-Timer = require("../../lib/Timer.coffee")
+Entity = require("../../core/Entity")
+Bullet = require("../../core/Bullet")
+Pool = require("../../core/Pool")
+Timer = require("../../core/Timer")
 
 # A standard BulletEmitter class that emits n-way bullet barrage
 # Extend from this class and modify @preset, @fireMore, @copy to customize

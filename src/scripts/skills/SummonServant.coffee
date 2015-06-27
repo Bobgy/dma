@@ -1,7 +1,7 @@
-util = require('../../lib/util')
+util = require('../../core/util')
 Vec2 = util.Vec2
-Skill = require('../../lib/Skill.coffee')
-Servant = require('../../lib/Servant.coffee')
+Skill = require('../../core/Skill')
+Servant = require('../../core/Servant')
 
 class SkillSummonServant extends Skill
   constructor: (args, id) ->
