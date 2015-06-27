@@ -82,6 +82,24 @@ class Vec2
   copy: (rhs) -> @set(rhs.x, rhs.y)
 Vec2.degToRad = Math.PI/180
 
+# for terminating the game
+class GameTimer
+  # @param id {string}
+  # @param gameLength {number}: the length of the game in miliseconds
+  constructor: (@id='gameTimer', @gameLength=120000) ->
+    @startTime = null
+    @cnt = 0
+
+  start: ->
+    @startTime = Date.now()
+
+  update: (server) ->
+    timeElapsed = Date.now() - @startTime
+    console.log("#{timeElapsed/1000} seconds elapsed") if (@cnt++ & 0xff) == 0
+    if Date.now() - @startTime > @gameLength
+      console.log('Time up')
+      server.callOnEnd()
+    return
 
 module.exports = {
   FPSLogger
@@ -89,4 +107,5 @@ module.exports = {
   setArgs
   AccurateInterval
   Vec2
+  GameTimer
 }

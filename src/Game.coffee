@@ -31,8 +31,11 @@ class Game extends Container
       @insert(new gui.ScoreBoard(null, 'ScoreBoard', @PIXI), this)
 
     # stores socket.io handle, should be added later
+    @server = null
     @sockets = null
     @users = null
+
+    @process = null
 
     # init
     SkillSummonServant.init(@worlds[i]) for i in [0..1]
@@ -43,15 +46,21 @@ class Game extends Container
       w: 640
       h: 640
     util.setArgs(@args, args)
-    return
+    return this
 
   update: =>
     @worlds[i].earlyUpdate(@worlds[i], @worlds[i^1]) for i in [0..1]
     @worlds[i].update(@worlds[i^1]) for i in [0..1]
+    @components.gameTimer?.update(@server)
     if @PIXI?
       @get('ScoreBoard').update(this, this)
       requestAnimationFrame(@animate)
     return
+
+  destroy: ->
+    @process.off()
+    for world in @worlds
+      world.destroy()
 
   animate: =>
     @stage.removeChildren()
@@ -70,7 +79,7 @@ class Game extends Container
       player = new core.Player(null, user, pos, new Vec2(), face)
       player.insert(new SkillSummonServant(null, 'skill'))
       @worlds[user].addPlayer(player)
-    return
+    return this
 
   # get a world with its id
   # @param id {integer}
@@ -83,8 +92,10 @@ class Game extends Container
   # @param interval {float}: the frame interval you intend the game to run with
   # @param isFPSon {boolean}: whether logging current FPS in game
   start: (interval=15) ->
+    if @components.gameTimer?
+      @components.gameTimer.start()
     @process = new util.AccurateInterval(@update, interval)
-    return
+    return this
 
   broadcast: (args...) ->
     if not @sockets? then throw new Error('Sockets is null')
@@ -92,5 +103,6 @@ class Game extends Container
     for user in @users
       socket = @sockets[user]
       socket.emit.apply(socket, args) if socket?
+    return this
 
 module.exports = Game

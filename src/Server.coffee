@@ -7,12 +7,15 @@ movementKeys = keys.slice(0, 5)
 
 class GameServer
   # @param sockets {Array[2] of socket}
-  constructor: (@users, @sockets, @fn) ->
+  constructor: (@users, @sockets, @callOnEnd) ->
     @game = new Game(null, 'server')
     @game.users = @users
     @game.sockets = @sockets
+    @game.server = this
+    @game.insert(new util.GameTimer)
     @game.initPlayers()
     @syncProcess = null
+    @startTime = null
 
   index: (id) ->
     return switch id
@@ -47,9 +50,10 @@ class GameServer
     @game.start(interval)
 
   destroy: ->
+    @game.broadcast('timeUp')
     @game.process.off()
     @game = null
-    @syncProcess.clearInterval()
+    @syncProcess.close()
     @syncProcess = null
 
 class Server
@@ -98,6 +102,7 @@ class Server
               gameServer.destroy()
               delete games[opponentID]
               delete games[userID]
+              console.log("Game between #{userID} and #{opponentID} ended")
             )
             games[opponentID] = gameServer
             games[userID] = gameServer
@@ -112,7 +117,9 @@ class Server
       socket.on('key', (keyCode, isDown, tick) ->
         if state > 0
           gameServer = games[userID]
-          if not gameServer? then throw new Error('state == 2, but not in game')
+          if not gameServer?
+            console.warn("Received key from #{userID} who is not in game.")
+            return
           idx = gameServer.index(userID)
           console.log("[#{tick}] player #{idx} #{keyCode} #{isDown} received")
           if keyCode in movementKeys

@@ -60,7 +60,8 @@ class BulletEmitter extends Entity
 
   destroy: (world, parent) ->
     @face = null
-    world.get('pools').get(@poolID).active = false if @poolID?
+    if world.components.pools?
+      world.get('pools').get(@poolID).active = false if @poolID?
     super(world, parent)
     return this
 

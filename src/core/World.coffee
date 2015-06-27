@@ -34,9 +34,12 @@ class World extends Container
       .on('syncPlayer', @syncPlayer)
 
     @tick = 0
-
     @game = null
-    @process = null
+
+  destroy: ->
+    super(this, this)
+    @game = null
+    @stage = null
 
   # @param player {Player}
   addPlayer: (player) ->

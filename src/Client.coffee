@@ -32,11 +32,14 @@ loader = new Loader(game, ->
   verbose = false
   socket.on('syncPlayer', (worldID, tick, players) ->
     world = game.worlds[worldID]
-    world.get('eventEmitter')
-      .pushEvent('syncPlayer', tick, players)
+    world.get('eventEmitter').pushEvent('syncPlayer', tick, players)
   )
 
   socket.on('id', (_id) -> id = _id)
+
+  socket.on('timeUp', ->
+    game.process.off()
+  )
 
   socket.on('sync', (worldID, tick, players, enemies, eventEmitter, pools) ->
     console.log("[#{tick}] sync #{worldID}")
