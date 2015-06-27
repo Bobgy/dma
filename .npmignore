@@ -5,6 +5,9 @@ test.js
 # Sublime
 *.un~
 
+# Gruntfile
+Gruntfile.coffee
+
 # source coffee files
 src
 
