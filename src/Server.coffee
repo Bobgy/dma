@@ -54,9 +54,9 @@ class GameServer
 
 class Server
   constructor: (@io) ->
-    @sockets = new Object
-    @games = new Object
-    @waitList = []
+    @sockets = Object.create(null)
+    @games = Object.create(null)
+    @waitList = Object.create(null)
 
   listen: ->
     sockets = @sockets
@@ -81,6 +81,7 @@ class Server
       socket.on('disconnect', ->
         if state > 0
           delete sockets[userID]
+          delete waitList[userID]
           console.log("#{socketID} disconnected with #{userID}")
         else
           console.log("#{socketID} disconnected")
@@ -90,15 +91,9 @@ class Server
         if state == 0
           console.warn('Attempt to match when not logged in.')
         else
-          i = 0
-          for user in waitList
-            if sockets[user]?
-              waitList[i] = user
-              i++
-          if i < waitList.length
-            waitList.splice(i + 1, waitList.length - i)
-          if waitList.length > 0
-            opponentID = waitList.pop()
+          if Object.hasOwnProperty.call(waitList, userID) then return
+          for user of waitList
+            opponentID = user
             gameServer = new GameServer([opponentID, userID], sockets, ->
               gameServer.destroy()
               delete games[opponentID]
@@ -108,9 +103,9 @@ class Server
             games[userID] = gameServer
             gameServer.start()
             console.log("#{userID} and #{opponentID} started a game")
-          else
-            waitList.push(userID) # waiting
-            console.log("#{userID} is waiting")
+            return
+          waitList[userID] = 1 # waiting
+          console.log("#{userID} is waiting")
         return
       )
 
