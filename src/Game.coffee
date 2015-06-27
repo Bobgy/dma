@@ -1,7 +1,9 @@
-Core = require('./core')
-util = Core.util
-Container = Core.Container
-World = Core.World
+"use strict"
+
+core = require('./core')
+util = core.util
+Container = core.Container
+World = core.World
 Vec2 = util.Vec2
 
 gui = require('./ui/gui')
@@ -29,7 +31,8 @@ class Game extends Container
       @insert(new gui.ScoreBoard(null, 'ScoreBoard', @PIXI), this)
 
     # stores socket.io handle, should be added later
-    sockets = null
+    @sockets = null
+    @users = null
 
     # init
     SkillSummonServant.init(@worlds[i]) for i in [0..1]
@@ -64,9 +67,10 @@ class Game extends Container
     for user in [0..1]
       pos = new Vec2(400, if user then 500 else 100)
       face = new Vec2(0, if user then -1 else 1)
-      player = new Core.Player(null, user, pos, new Vec2(), face)
+      player = new core.Player(null, user, pos, new Vec2(), face)
       player.insert(new SkillSummonServant(null, 'skill'))
       @worlds[user].addPlayer(player)
+    return
 
   # get a world with its id
   # @param id {integer}
@@ -81,5 +85,12 @@ class Game extends Container
   start: (interval=15) ->
     @process = new util.AccurateInterval(@update, interval)
     return
+
+  broadcast: (args...) ->
+    if not @sockets? then throw new Error('Sockets is null')
+    console.dir(args)
+    for user in @users
+      socket = @sockets[user]
+      socket.emit.apply(socket, args) if socket?
 
 module.exports = Game

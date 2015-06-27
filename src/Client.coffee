@@ -1,7 +1,7 @@
 "use strict"
 
-Core = require('./core/index')
-for id, mod of Core
+core = require('./core/index')
+for id, mod of core
   this[id] = mod
 Loader = require('./AssetsLoader')
 Game = require('./Game')
@@ -19,7 +19,7 @@ loader = new Loader(game, ->
   console.log('Assets are loaded.')
   @game.assets = @loader.resources
 
-  history = new Core.EventEmitter.FixedsizeEventEmitter(16)
+  history = new core.EventEmitter.FixedsizeEventEmitter(16)
   document.body.appendChild(game.renderer.view)
 
   keys = [87, 65, 83, 68, 16, 191]
@@ -82,6 +82,7 @@ loader = new Loader(game, ->
   )
 
   socket.on('Servant', (tick, worldID, servant) ->
+    console.log("[#{tick}] servant in world #{worldID}")
     game.worlds[worldID].components.eventEmitter.
          pushEvent('Servant', tick, tick, servant)
   )

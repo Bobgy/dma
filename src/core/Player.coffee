@@ -63,10 +63,11 @@ class Player extends Entity
                       'resurrectTimer', 0, callback)
     world.insert(timer)
 
-    # broadcast score change
     game = world.game
-    game.score[world.id^1]++
-    game.io.emit('score', game.score) if game.io?
+    # broadcast score change
+    if game.sockets?
+      game.score[world.id^1]++
+      game.broadcast('score', game.score)
 
     return this
 

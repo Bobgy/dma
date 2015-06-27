@@ -1,8 +1,8 @@
 "use strict"
 
-Core = require('../core')
+core = require('../core')
 
-class GUI extends Core.Container
+class GUI extends core.Container
   # @param args {Object}
   #   pos {x, y}: position
   # @inheritDoc
@@ -17,7 +17,7 @@ class GUI extends Core.Container
       pos:
         x: 0
         y: 0
-    Core.util.setArgs(@args, args)
+    core.util.setArgs(@args, args)
 
   destroy: (game, parent) ->
     super(game, parent)

@@ -1,6 +1,6 @@
-Core = require('./core')
+core = require('./core')
 Game = require('./Game')
-util = Core.util
+util = core.util
 Vec2 = util.Vec2
 keys = [16, 65, 68, 83, 87, 191]
 movementKeys = keys.slice(0, 5)
@@ -62,22 +62,28 @@ class Server
     sockets = @sockets
     games = @games
     waitList = @waitList
+    socketCount = 0
     @io.on('connection', (socket) ->
       state = 0 # waiting for user_id
       userID = null
+      socketID = socketCount++
       socket.on('user_id', (user_id) ->
         if state == 0
           userID = user_id
           sockets[user_id] = socket
-          console.log("#{userID} connected")
+          console.log("#{socketID} connected with #{userID}")
           #                        reconnect   login
-          state = if games[userID]? then 2 else 1
+          if games[userID]?
+            console.log("#{userID} reconnected")
+          state = 1
         return
       )
       socket.on('disconnect', ->
         if state > 0
           delete sockets[userID]
-          console.log(userID + ' disconnected')
+          console.log("#{socketID} disconnected with #{userID}")
+        else
+          console.log("#{socketID} disconnected")
         return
       )
       socket.on('match', ->
@@ -97,27 +103,29 @@ class Server
               gameServer.destroy()
               delete games[opponentID]
               delete games[userID]
-              state = 1
             )
-            state = 2 # in game
             games[opponentID] = gameServer
             games[userID] = gameServer
             gameServer.start()
+            console.log("#{userID} and #{opponentID} started a game")
           else
             waitList.push(userID) # waiting
+            console.log("#{userID} is waiting")
         return
       )
 
       socket.on('key', (keyCode, isDown, tick) ->
-        if state == 2 # in game
+        if state > 0
           gameServer = games[userID]
           if not gameServer? then throw new Error('state == 2, but not in game')
+          idx = gameServer.index(userID)
+          console.log("[#{tick}] player #{idx} #{keyCode} #{isDown} received")
           if keyCode in movementKeys
             sockets[gameServer.other(userID)].emit(
-              'key', userID, keyCode, isDown, tick
+              'key', idx, keyCode, isDown, tick
             )
           game = gameServer.game
-          world = game.worlds[game.index(userID)]
+          world = game.worlds[idx]
           if tick <= world.tick
             console.warn('Warning:', userID, 'key', keyCode,
                         'send', tick, ', rec', world.tick)
@@ -127,7 +135,7 @@ class Server
         return
       )
 
-      console.log('Someone connected')
+      console.log("#{socketID} connected")
     )
     return
 

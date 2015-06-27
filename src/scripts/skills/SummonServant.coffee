@@ -15,8 +15,9 @@ class SkillSummonServant extends Skill
     world.game.getWorld(world.id^1).get('eventEmitter').pushEvent(
       'Servant', world.tick + 1, world.tick + 1, servant
     )
-    if world.game.io? # TODO change to serverOnly
-      world.game.io.emit('Servant', world.tick + 1, world.id^1, servant)
+    game = world.game
+    if game.sockets? # TODO change to serverOnly
+      game.broadcast('Servant', world.tick + 1, world.id ^ 1, servant)
 
 SkillSummonServant.init = (world, parent) ->
   world.get('eventEmitter').on('Servant', (tick, servantPrototype) ->
